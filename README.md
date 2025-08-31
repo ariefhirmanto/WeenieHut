@@ -62,31 +62,25 @@ Clean up binary from the last build:
 make clean
 ```
 
-Setup db migrations
-
-```bash
-make db-migrate-setup
-```
-
-create db migrations script
+Create db migrations script
 
 ```bash
 make db-migrate-create file={file_name}
 ```
 
-db migrations up
+DB migrations up
 
 ```bash
 make db-migrate-up
 ```
 
-db migrations down
+DB migrations down
 
 ```bash
 make db-migrate-down
 ```
 
-db generate sql
+DB generate sql code
 
 ```bash
 make db-generate-sql
