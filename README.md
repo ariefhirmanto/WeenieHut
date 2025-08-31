@@ -98,3 +98,15 @@ make db-generate-sql
 go install github.com/pressly/goose/v3/cmd/goose@latest
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 ```
+
+## Setup Goose Env
+
+```bash
+ @export GOOSE_DRIVER=postgres
+ @export GOOSE_MIGRATION_DIR=db/sql/migrations
+ @export GOOSE_DBSTRING="user=postgres password=postgres dbname=salty-spitoon-dev host=localhost port=5432 sslmode=disable"
+```
+
+## Create SQL query
+
+Write your query in db/sql/query directory and run `mamek db-generate-sql`
