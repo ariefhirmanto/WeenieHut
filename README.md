@@ -93,6 +93,10 @@ go install github.com/pressly/goose/v3/cmd/goose@latest
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 ```
 
+## Create .env file
+
+Create your .env file and use the .env.sample file as reference
+
 ## Setup Goose Env
 
 ```bash
