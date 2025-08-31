@@ -109,4 +109,4 @@ go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 
 ## Create SQL query
 
-Write your query in db/sql/query directory and run `mamek db-generate-sql`
+Write your query in db/sql/query directory and run `make db-generate-sql`
