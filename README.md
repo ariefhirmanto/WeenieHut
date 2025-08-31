@@ -9,45 +9,92 @@ These instructions will get you a copy of the project up and running on your loc
 ## MakeFile
 
 Run build make command with tests
+
 ```bash
 make all
 ```
 
 Build the application
+
 ```bash
 make build
 ```
 
 Run the application
+
 ```bash
 make run
 ```
+
 Create DB container
+
 ```bash
 make docker-run
 ```
 
 Shutdown DB Container
+
 ```bash
 make docker-down
 ```
 
 DB Integrations Test:
+
 ```bash
 make itest
 ```
 
 Live reload the application:
+
 ```bash
 make watch
 ```
 
 Run the test suite:
+
 ```bash
 make test
 ```
 
 Clean up binary from the last build:
+
 ```bash
 make clean
+```
+
+Setup db migrations
+
+```bash
+make db-migrate-setup
+```
+
+create db migrations script
+
+```bash
+make db-migrate-create file={file_name}
+```
+
+db migrations up
+
+```bash
+make db-migrate-up
+```
+
+db migrations down
+
+```bash
+make db-migrate-down
+```
+
+db generate sql
+
+```bash
+make db-generate-sql
+```
+
+## Setup Dependencies
+
+```bash
+go install github.com/pressly/goose/v3/cmd/goose@latest
+go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 ```
