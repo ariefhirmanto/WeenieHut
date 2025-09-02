@@ -1,10 +1,10 @@
 # Project SaltySpitoon
 
-One Paragraph of project description goes here
+TeamSolid Project 1 Implementation for ProjectSprint
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ## MakeFile
 
@@ -100,9 +100,9 @@ Create your .env file and use the .env.sample file as reference
 ## Setup Goose Env
 
 ```bash
- @export GOOSE_DRIVER=postgres
- @export GOOSE_MIGRATION_DIR=db/sql/migrations
- @export GOOSE_DBSTRING="user=postgres password=postgres dbname=salty-spitoon-dev host=localhost port=5432 sslmode=disable"
+ export GOOSE_DRIVER=postgres
+ export GOOSE_MIGRATION_DIR=db/sql/migrations
+ export GOOSE_DBSTRING="user=postgres password=postgres dbname=salty-spitoon-dev host=localhost port=5432 sslmode=disable"
 ```
 
 ## Create SQL query
