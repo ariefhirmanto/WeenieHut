@@ -5,31 +5,32 @@
 package repository
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
+	"database/sql"
+	"time"
 )
 
 type Activity struct {
 	ID              int64
 	UserID          int64
 	ActivityType    string
-	DoneAt          pgtype.Timestamp
+	DoneAt          time.Time
 	DurationMinutes int32
 	CaloriesBurned  int32
-	CreatedAt       pgtype.Timestamp
-	UpdatedAt       pgtype.Timestamp
+	CreatedAt       sql.NullTime
+	UpdatedAt       sql.NullTime
 }
 
 type User struct {
 	ID           int64
 	Email        string
 	PasswordHash string
-	Name         pgtype.Text
-	Preference   pgtype.Text
-	WeightUnit   pgtype.Text
-	HeightUnit   pgtype.Text
-	Weight       pgtype.Numeric
-	Height       pgtype.Numeric
-	ImageUri     pgtype.Text
-	CreatedAt    pgtype.Timestamp
-	UpdatedAt    pgtype.Timestamp
+	Name         sql.NullString
+	Preference   sql.NullString
+	WeightUnit   sql.NullString
+	HeightUnit   sql.NullString
+	Weight       sql.NullString
+	Height       sql.NullString
+	ImageUri     sql.NullString
+	CreatedAt    sql.NullTime
+	UpdatedAt    sql.NullTime
 }

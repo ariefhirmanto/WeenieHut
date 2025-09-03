@@ -9,39 +9,32 @@ import (
 	"context"
 )
 
-const listUsers = `-- name: ListUsers :many
-SELECT id, email, password_hash, name, preference, weight_unit, height_unit, weight, height, image_uri, created_at, updated_at FROM users
+const createUser = `-- name: CreateUser :exec
+INSERT INTO users (email, password_hash) VALUES ($1, $2)
 `
 
-func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.Query(ctx, listUsers)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []User
-	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.Email,
-			&i.PasswordHash,
-			&i.Name,
-			&i.Preference,
-			&i.WeightUnit,
-			&i.HeightUnit,
-			&i.Weight,
-			&i.Height,
-			&i.ImageUri,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+type CreateUserParams struct {
+	Email        string
+	PasswordHash string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.ExecContext(ctx, createUser, arg.Email, arg.PasswordHash)
+	return err
+}
+
+const selectUserByEmail = `-- name: SelectUserByEmail :one
+SELECT id, password_hash FROM users where email = $1
+`
+
+type SelectUserByEmailRow struct {
+	ID           int64
+	PasswordHash string
+}
+
+func (q *Queries) SelectUserByEmail(ctx context.Context, email string) (SelectUserByEmailRow, error) {
+	row := q.db.QueryRowContext(ctx, selectUserByEmail, email)
+	var i SelectUserByEmailRow
+	err := row.Scan(&i.ID, &i.PasswordHash)
+	return i, err
 }
