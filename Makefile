@@ -44,6 +44,9 @@ clean:
 	@echo "Cleaning..."
 	@rm -f main
 
+lint:
+	@golangci-lint run
+
 # Live Reload
 watch:
 	@if command -v air > /dev/null; then \
@@ -73,4 +76,4 @@ db-migrate-down:
 db-generate-sql:
 	@sqlc generate
 
-.PHONY: all build run test clean watch docker-run docker-down itest db-migrate-create db-migrate-up db-migrate-down db-generate-sql
+.PHONY: all build run test clean watch lint docker-run docker-down itest db-migrate-create db-migrate-up db-migrate-down db-generate-sql
