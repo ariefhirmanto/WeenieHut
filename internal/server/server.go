@@ -1,29 +1,34 @@
 package server
 
 import (
+	"context"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
-
-	"SaltySpitoon/internal/database"
 )
 
-type Server struct {
-	port int
-
-	db database.Service
+type Service interface {
+	Login(ctx context.Context, email string, password string) (string, error)
+	Register(ctx context.Context, email string, password string) (string, error)
 }
 
-func NewServer() *http.Server {
+type Server struct {
+	port      int
+	service   Service
+	validator *validator.Validate
+}
+
+func NewServer(service Service) *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
-		port: port,
-
-		db: database.New(),
+		port:      port,
+		service:   service,
+		validator: validator.New(),
 	}
 
 	// Declare Server config

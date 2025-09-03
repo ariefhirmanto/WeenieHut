@@ -1,6 +1,9 @@
 package main
 
 import (
+	"SaltySpitoon/internal/database"
+	"SaltySpitoon/internal/repository"
+	"SaltySpitoon/internal/service"
 	"context"
 	"fmt"
 	"log"
@@ -38,16 +41,19 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 }
 
 func main() {
-
-	server := server.NewServer()
+	db := database.New()
+	defer db.Close()
+	repo := repository.New(db)
+	svc := service.New(repo)
+	serv := server.NewServer(svc)
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
 
 	// Run graceful shutdown in a separate goroutine
-	go gracefulShutdown(server, done)
+	go gracefulShutdown(serv, done)
 
-	err := server.ListenAndServe()
+	err := serv.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		panic(fmt.Sprintf("http server error: %s", err))
 	}
