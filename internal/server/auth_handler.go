@@ -28,10 +28,15 @@ func (s *Server) loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	token, err := s.service.Login(ctx, req.Email, req.Password)
 	if err != nil {
+		log.Printf("failed to login: %s\n", err.Error())
 		if errors.Is(err, constants.ErrUserNotFound) {
 			sendErrorResponse(w, http.StatusNotFound, fmt.Sprintf("email %s not found", req.Email))
+			return
 		}
-		log.Printf("failed to login: %s\n", err.Error())
+		if errors.Is(err, constants.ErrUserWrongPassword) {
+			sendErrorResponse(w, http.StatusBadRequest, "wrong password")
+			return
+		}
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -55,22 +60,23 @@ func (s *Server) registerHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = s.validator.Struct(req)
 	if err != nil {
-		log.Printf("invalid login request: %s\n", err.Error())
+		log.Printf("invalid register request: %s\n", err.Error())
 		sendErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	token, err := s.service.Register(ctx, req.Email, req.Password)
 	if err != nil {
+		log.Printf("failed to register: %s\n", err.Error())
 		if errors.Is(err, constants.ErrEmailAlreadyExists) {
 			sendErrorResponse(w, http.StatusConflict, fmt.Sprintf("email %s already exists", req.Email))
+			return
 		}
-		log.Printf("failed to login: %s\n", err.Error())
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	resp := LoginResponse{
+	resp := RegisterResponse{
 		Email: req.Email,
 		Token: token,
 	}

@@ -3,11 +3,12 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/go-playground/validator/v10"
 
 	_ "github.com/joho/godotenv/autoload"
 )
