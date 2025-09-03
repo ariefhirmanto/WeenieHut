@@ -42,6 +42,7 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 
 func main() {
 	db := database.New()
+	defer db.Close()
 	repo := repository.New(db)
 	svc := service.New(repo)
 	serv := server.NewServer(svc)
