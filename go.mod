@@ -1,4 +1,4 @@
-module SaltySpitoon
+module WeenieHut
 
 go 1.23.0
 

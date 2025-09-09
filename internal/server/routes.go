@@ -1,8 +1,8 @@
 package server
 
 import (
-	"SaltySpitoon/internal/constants"
-	"SaltySpitoon/internal/utils"
+	"WeenieHut/internal/constants"
+	"WeenieHut/internal/utils"
 	"context"
 	"net/http"
 	"strings"

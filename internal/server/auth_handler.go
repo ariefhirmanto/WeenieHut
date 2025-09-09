@@ -1,7 +1,7 @@
 package server
 
 import (
-	"SaltySpitoon/internal/constants"
+	"WeenieHut/internal/constants"
 	"encoding/json"
 	"errors"
 	"fmt"

@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"SaltySpitoon/internal/constants"
-	"SaltySpitoon/internal/model"
+	"WeenieHut/internal/constants"
+	"WeenieHut/internal/model"
 	"context"
 	"os"
 	"time"
@@ -40,7 +40,7 @@ func GenerateToken(userID int64) (string, error) {
 	claims := model.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
-			Issuer:    "SaltySpitoon",
+			Issuer:    "WeenieHut",
 		},
 		UserID: userID,
 	}

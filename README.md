@@ -1,4 +1,4 @@
-# Project SaltySpitoon
+# Project WeenieHut
 
 TeamSolid Project 1 Implementation for ProjectSprint
 

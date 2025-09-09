@@ -1,7 +1,7 @@
 package server
 
 import (
-	"SaltySpitoon/internal/utils"
+	"WeenieHut/internal/utils"
 	"log"
 	"net/http"
 )
