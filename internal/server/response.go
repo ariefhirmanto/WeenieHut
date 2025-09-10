@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 )
 
 type ErrorResponse struct {
@@ -39,4 +40,32 @@ type LoginResponse struct {
 type RegisterResponse struct {
 	Email string `json:"email"`
 	Token string `json:"token"`
+}
+
+type PurchasedItem struct {
+	ProductID        string    `json:"productId"` // Any ID
+	Name             string    `json:"name"`
+	Category         string    `json:"category"`
+	Qty              int       `json:"qty"`   // Quantity before bought
+	Price            int64     `json:"price"` // Price per item
+	SKU              string    `json:"sku"`
+	FileID           string    `json:"fileId"`
+	FileURI          string    `json:"fileUri"`          // Related file URI
+	FileThumbnailURI string    `json:"fileThumbnailUri"` // Related thumbnail URI
+	CreatedAt        time.Time `json:"createdAt"`
+	UpdatedAt        time.Time `json:"updatedAt"`
+}
+
+type PaymentDetail struct {
+	BankAccountName   string `json:"bankAccountName"`
+	BankAccountHolder string `json:"bankAccountHolder"`
+	BankAccountNumber string `json:"bankAccountNumber"`
+	TotalPrice        int64  `json:"totalPrice"` // Total for this seller
+}
+
+type PurchaseResponse struct {
+	PurchaseID     string          `json:"purchaseId"`     // Any ID
+	PurchasedItems []PurchasedItem `json:"purchasedItems"` // Must be at least 1
+	TotalPrice     int64           `json:"totalPrice"`     // Sum of all item prices
+	PaymentDetails []PaymentDetail `json:"paymentDetails"` // One per seller involved in transaction
 }
