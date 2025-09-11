@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (model.Product, error) {
+func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (res model.Product, err error) {
 	query := `
 		INSERT INTO product (
 			name, category, qty, price, sku, file_id, file_uri, file_thumbnail_uri, created_at, updated_at
@@ -21,7 +21,7 @@ func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (model.
 	inserted := model.Product{}
 	inserted = data
 
-	err := q.db.QueryRowContext(ctx, query,
+	err = q.db.QueryRowContext(ctx, query,
 		data.Name,
 		data.Category,
 		data.Qty,
@@ -36,10 +36,10 @@ func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (model.
 		return model.Product{}, fmt.Errorf("insert product: %w", err)
 	}
 
-	return inserted, nil
+	return
 }
 
-func (q *Queries) GetProducts(ctx context.Context, filter service.ProductFilter) ([]model.Product, error) {
+func (q *Queries) GetProducts(ctx context.Context, filter service.ProductFilter) (res []model.Product, err error) {
 	query := `
 		SELECT id, name, category, qty, price, sku, file_id, file_uri, file_thumbnail_uri, created_at, updated_at
 		FROM product
@@ -133,5 +133,18 @@ func (q *Queries) GetProducts(ctx context.Context, filter service.ProductFilter)
 		return nil, err
 	}
 
-	return products, nil
+	res = products
+
+	return
+}
+
+func (q *Queries) DeleteProductByID(ctx context.Context, id int64) (err error) {
+	query := `DELETE FROM product WHERE id = $1`
+
+	_, err = q.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	return
 }
