@@ -11,10 +11,10 @@ type RegisterRequest struct {
 }
 
 type PostProductRequest struct {
-	Name     string `json:"name" validate:"string,required,min=4,max=32"`
-	Category string `json:"category" validate:"string,required,productType"`
-	Qty      int    `json:"qty" validate:"numeric,required,min=1"`
-	Price    int    `json:"price" validate:"numeric,required,min=100"`
-	Sku      string `json:"sku" validate:"string,required,min=0,max=32"`
-	FileID   string `json:"fileId" validate:"string,required"`
+	Name     string  `json:"name" validate:"required,min=4,max=32"`
+	Category string  `json:"category" validate:"required,productType"`
+	Qty      int     `json:"qty" validate:"required,min=1"`
+	Price    float64 `json:"price" validate:"required,gt=0"`
+	Sku      string  `json:"sku" validate:"required,min=1,max=32"`
+	FileID   string  `json:"fileId" validate:"required"`
 }
