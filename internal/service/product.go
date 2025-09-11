@@ -39,6 +39,8 @@ func (s *Service) PostProduct(ctx context.Context, req server.PostProductRequest
 		FileID:           utils.PointerValue(insertedProduct.FileID, ""),
 		FileUri:          "",
 		FileThumbnailUri: "",
+		CreatedAt:        insertedProduct.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:        insertedProduct.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 
 	return
