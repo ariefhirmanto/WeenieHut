@@ -17,6 +17,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("POST /v1/login", s.loginHandler)
 	mux.HandleFunc("POST /v1/product", s.productHandler)
 
+	mux.HandleFunc("POST /v1/purchase", s.purchaseCartHandler)
+
 	return s.authMiddleware(mux)
 }
 
