@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -38,7 +39,7 @@ func NewServer(service Service) *http.Server {
 	NewServer.validator.RegisterValidation("productType", func(fl validator.FieldLevel) bool {
 		productType := fl.Field().String()
 		for _, pt := range constants.ProductTypes {
-			if pt == productType {
+			if strings.ToLower(pt) == strings.ToLower(productType) {
 				return true
 			}
 		}
