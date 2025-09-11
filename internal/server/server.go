@@ -41,7 +41,7 @@ func NewServer(service Service) *http.Server {
 	NewServer.validator.RegisterValidation("productType", func(fl validator.FieldLevel) bool {
 		productType := fl.Field().String()
 		for _, pt := range constants.ProductTypes {
-			if strings.ToLower(pt) == strings.ToLower(productType) {
+			if strings.EqualFold(pt, productType) {
 				return true
 			}
 		}
