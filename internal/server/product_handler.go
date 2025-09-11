@@ -71,3 +71,27 @@ func (s *Server) getProductsHandler(w http.ResponseWriter, r *http.Request) {
 
 	sendResponse(w, http.StatusOK, res)
 }
+
+func (s *Server) deleteProductHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		sendErrorResponse(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	query := r.URL.Query()
+	req := DeleteProductRequest{
+		ProductID: query.Get("productId"),
+	}
+
+	err := s.service.DeleteProduct(r.Context(), req)
+	if err != nil {
+		if err.Error() == "product not found" {
+			sendErrorResponse(w, http.StatusNotFound, err.Error())
+		} else {
+			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	sendResponse(w, http.StatusOK, map[string]string{"message": "product deleted"})
+}

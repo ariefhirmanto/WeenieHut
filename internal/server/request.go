@@ -27,3 +27,7 @@ type GetProductsRequest struct {
 	Limit     string `query:"limit"`
 	Offset    string `query:"offset"`
 }
+
+type DeleteProductRequest struct {
+	ProductID string `query:"productId"`
+}

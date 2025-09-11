@@ -5,6 +5,7 @@ import (
 	"WeenieHut/internal/server"
 	"WeenieHut/internal/utils"
 	"context"
+	"database/sql"
 	"errors"
 	"strconv"
 )
@@ -114,6 +115,26 @@ func (s *Service) GetProducts(ctx context.Context, req server.GetProductsRequest
 			CreatedAt:        p.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt:        p.UpdatedAt.Format("2006-01-02 15:04:05"),
 		})
+	}
+
+	return
+}
+
+func (s *Service) DeleteProduct(ctx context.Context, req server.DeleteProductRequest) (err error) {
+	productIDInt := 0
+	if req.ProductID != "" {
+		productIDInt, err = strconv.Atoi(req.ProductID)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = s.repository.DeleteProductByID(ctx, int64(productIDInt))
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return errors.New("product not found")
+		}
+		return err
 	}
 
 	return
