@@ -17,9 +17,8 @@ func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (res mo
 		)
 		RETURNING id, created_at, updated_at
 	`
-
-	inserted := model.Product{}
-	inserted = data
+	fmt.Println("Executing Query:", query, "with data:", data)
+	inserted := data
 
 	err = q.db.QueryRowContext(ctx, query,
 		data.Name,
@@ -35,6 +34,8 @@ func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (res mo
 	if err != nil {
 		return model.Product{}, fmt.Errorf("insert product: %w", err)
 	}
+
+	res = inserted
 
 	return
 }
