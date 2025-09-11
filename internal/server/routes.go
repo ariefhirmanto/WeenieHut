@@ -24,7 +24,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 func (s *Server) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
-		if path == "/health" || path == "/v1/login" || path == "/v1/register" || path == "/v1/file" {
+		if path == "/health" || path == "/v1/login" || path == "/v1/register" {
 			next.ServeHTTP(w, r)
 			return
 		}
