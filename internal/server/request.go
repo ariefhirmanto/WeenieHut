@@ -18,3 +18,12 @@ type PostProductRequest struct {
 	Sku      string  `json:"sku" validate:"required,min=1,max=32"`
 	FileID   string  `json:"fileId" validate:"required"`
 }
+
+type GetProductsRequest struct {
+	ProductID string `query:"productId"`
+	Sku       string `query:"sku"`
+	Category  string `query:"category"`
+	SortBy    string `query:"sortBy"`
+	Limit     string `query:"limit"`
+	Offset    string `query:"offset"`
+}

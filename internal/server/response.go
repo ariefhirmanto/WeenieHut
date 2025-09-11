@@ -54,3 +54,17 @@ type PostProductResponse struct {
 	CreatedAt        string  `json:"createdAt"`
 	UpdatedAt        string  `json:"updatedAt"`
 }
+
+type GetProductResponse struct {
+	ProductID        string  `json:"productId"`
+	Name             string  `json:"name"`
+	Category         string  `json:"category"`
+	Qty              int     `json:"qty"`
+	Price            float64 `json:"price"`
+	Sku              string  `json:"sku"`
+	FileID           string  `json:"fileId"`
+	FileUri          string  `json:"fileUri"`
+	FileThumbnailUri string  `json:"fileThumbnailUri"`
+	CreatedAt        string  `json:"createdAt"`
+	UpdatedAt        string  `json:"updatedAt"`
+}
