@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"strings"
@@ -20,6 +21,12 @@ func (s *Server) productHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	var req PostProductRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+
 	if err := s.validator.Struct(req); err != nil {
 		sendErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -27,7 +34,7 @@ func (s *Server) productHandler(w http.ResponseWriter, r *http.Request) {
 
 	res, err := s.service.PostProduct(ctx, req)
 	if err != nil {
-		log.Println("failed to create activity:", err)
+		log.Println("failed to create product:", err)
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
