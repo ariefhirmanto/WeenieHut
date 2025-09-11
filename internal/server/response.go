@@ -40,3 +40,9 @@ type RegisterResponse struct {
 	Email string `json:"email"`
 	Token string `json:"token"`
 }
+
+type FileUploadResponse struct {
+	FileID           string `json:"fileId"`
+	FileUri          string `json:"fileUri"`
+	FileThumbnailUri string `json:"fileThumbnailUri"`
+}

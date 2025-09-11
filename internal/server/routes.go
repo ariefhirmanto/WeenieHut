@@ -16,13 +16,15 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("POST /v1/register", s.registerHandler)
 	mux.HandleFunc("POST /v1/login", s.loginHandler)
 
+	mux.HandleFunc("POST /v1/file", s.fileUploadHandler)
+
 	return s.authMiddleware(mux)
 }
 
 func (s *Server) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
-		if path == "/health" || path == "/v1/login" || path == "/v1/register" {
+		if path == "/health" || path == "/v1/login" || path == "/v1/register" || path == "/v1/file" {
 			next.ServeHTTP(w, r)
 			return
 		}

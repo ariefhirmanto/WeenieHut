@@ -12,7 +12,9 @@ func setupTestMinioStorage(t *testing.T) *MinioStorage {
 	s3Endpoint := "localhost:9000"
 	s3AccessKeyID := "team-solid"
 	s3SecretAccessKey := "@team-solid"
-	return New(s3Endpoint, s3AccessKeyID, s3SecretAccessKey)
+	return New(s3Endpoint, s3AccessKeyID, s3SecretAccessKey, Option{
+		MaxConcurrent: 5,
+	})
 }
 
 func TestStorage(t *testing.T) {
