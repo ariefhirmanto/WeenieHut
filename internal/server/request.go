@@ -14,7 +14,7 @@ type PostProductRequest struct {
 	Name     string  `json:"name" validate:"required,min=4,max=32"`
 	Category string  `json:"category" validate:"required,productType"`
 	Qty      int     `json:"qty" validate:"required,min=1"`
-	Price    float64 `json:"price" validate:"required,gt=0"`
+	Price    float64 `json:"price" validate:"required,gte=100"`
 	Sku      string  `json:"sku" validate:"required,min=1,max=32"`
 	FileID   string  `json:"fileId" validate:"required"`
 }
@@ -26,6 +26,16 @@ type GetProductsRequest struct {
 	SortBy    string `query:"sortBy"`
 	Limit     string `query:"limit"`
 	Offset    string `query:"offset"`
+}
+
+type PutProductRequest struct {
+	ProductID string  `query:"productId"`
+	Name      string  `json:"name" validate:"required,min=4,max=32"`
+	Category  string  `json:"category" validate:"required,productType"`
+	Qty       int     `json:"qty" validate:"required,min=1"`
+	Price     float64 `json:"price" validate:"required,gte=100"`
+	Sku       string  `json:"sku" validate:"required,min=1,max=32"`
+	FileID    string  `json:"fileId" validate:"required"`
 }
 
 type DeleteProductRequest struct {

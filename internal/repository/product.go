@@ -139,6 +139,44 @@ func (q *Queries) GetProducts(ctx context.Context, filter service.ProductFilter)
 	return
 }
 
+func (q *Queries) UpdateProduct(ctx context.Context, data model.Product) (res model.Product, err error) {
+	query := `
+		UPDATE product 
+		SET name = $1, category = $2, qty = $3, price = $4, sku = $5, file_id = $6, updated_at = NOW()
+		WHERE id = $7
+		RETURNING id, name, category, qty, price, sku, file_id, file_uri, file_thumbnail_uri, created_at, updated_at
+	`
+
+	var updated model.Product
+
+	err = q.db.QueryRowContext(ctx, query,
+		data.Name,
+		data.Category,
+		data.Qty,
+		data.Price,
+		data.SKU,
+		data.FileID,
+		data.ID,
+	).Scan(
+		&updated.ID,
+		&updated.Name,
+		&updated.Category,
+		&updated.Qty,
+		&updated.Price,
+		&updated.SKU,
+		&updated.FileID,
+		&updated.FileURI,
+		&updated.FileThumbnailURI,
+		&updated.CreatedAt,
+		&updated.UpdatedAt,
+	)
+	if err != nil {
+		return model.Product{}, fmt.Errorf("update product: %w", err)
+	}
+
+	return updated, nil
+}
+
 func (q *Queries) DeleteProductByID(ctx context.Context, id int64) (err error) {
 	query := `DELETE FROM product WHERE id = $1`
 
