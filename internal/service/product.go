@@ -139,3 +139,53 @@ func (s *Service) DeleteProduct(ctx context.Context, req server.DeleteProductReq
 
 	return
 }
+
+func (s *Service) UpdateProduct(ctx context.Context, req server.PutProductRequest) (res server.PutProductResponse, err error) {
+	//
+	// Set Value for Update Product
+	//
+	productIDInt := 0
+	if req.ProductID != "" {
+		productIDInt, err = strconv.Atoi(req.ProductID)
+		if err != nil {
+			return res, err
+		}
+	}
+
+	updateData := model.Product{
+		ID:       int64(productIDInt),
+		Name:     req.Name,
+		Category: utils.ToPointer(req.Category),
+		Qty:      req.Qty,
+		Price:    req.Price,
+		SKU:      req.Sku,
+		FileID:   utils.ToPointer(req.FileID),
+	}
+
+	//
+	// Update Product
+	//
+	val, err := s.repository.UpdateProduct(ctx, updateData)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return res, errors.New("product not found")
+		}
+		return res, err
+	}
+
+	res = server.PutProductResponse{
+		ProductID:        strconv.Itoa(int(val.ID)),
+		Name:             val.Name,
+		Category:         utils.PointerValue(val.Category, ""),
+		Qty:              val.Qty,
+		Price:            val.Price,
+		Sku:              val.SKU,
+		FileID:           utils.PointerValue(val.FileID, ""),
+		FileUri:          utils.PointerValue(val.FileURI, ""),
+		FileThumbnailUri: utils.PointerValue(val.FileThumbnailURI, ""),
+		CreatedAt:        val.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:        val.UpdatedAt.Format("2006-01-02 15:04:05"),
+	}
+
+	return res, nil
+}

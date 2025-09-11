@@ -20,6 +20,7 @@ type Service interface {
 	Register(ctx context.Context, email string, password string) (string, error)
 	PostProduct(ctx context.Context, req PostProductRequest) (res PostProductResponse, err error)
 	GetProducts(ctx context.Context, req GetProductsRequest) (res []GetProductResponse, err error)
+	UpdateProduct(ctx context.Context, req PutProductRequest) (res PutProductResponse, err error)
 	DeleteProduct(ctx context.Context, req DeleteProductRequest) (err error)
 }
 

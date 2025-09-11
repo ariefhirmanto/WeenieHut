@@ -13,8 +13,11 @@ type Service struct {
 type Repository interface {
 	// SelectUserByEmail(ctx context.Context, email string) (repository.SelectUserByEmailRow, error)
 	// CreateUser(ctx context.Context, arg repository.CreateUserParams) (int64, error)
+
+	// Product Repository
 	InsertProduct(ctx context.Context, data model.Product) (res model.Product, err error)
 	GetProducts(ctx context.Context, filter ProductFilter) (res []model.Product, err error)
+	UpdateProduct(ctx context.Context, data model.Product) (res model.Product, err error)
 	DeleteProductByID(ctx context.Context, id int64) (err error)
 }
 

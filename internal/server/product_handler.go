@@ -95,3 +95,43 @@ func (s *Server) deleteProductHandler(w http.ResponseWriter, r *http.Request) {
 
 	sendResponse(w, http.StatusOK, map[string]string{"message": "product deleted"})
 }
+
+func (s *Server) updateProductHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		sendErrorResponse(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	ct := r.Header.Get("Content-Type")
+	if ct == "" || !strings.HasPrefix(ct, "application/json") {
+		sendErrorResponse(w, http.StatusBadRequest, "invalid content type")
+		return
+	}
+
+	query := r.URL.Query()
+	req := PutProductRequest{
+		ProductID: query.Get("productId"),
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+
+	if err := s.validator.Struct(req); err != nil {
+		sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	res, err := s.service.UpdateProduct(r.Context(), req)
+	if err != nil {
+		if err.Error() == "product not found" {
+			sendErrorResponse(w, http.StatusNotFound, err.Error())
+		} else {
+			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	sendResponse(w, http.StatusOK, res)
+}
