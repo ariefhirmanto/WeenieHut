@@ -1,6 +1,7 @@
 package server
 
 import (
+	"WeenieHut/internal/constants"
 	"context"
 	"fmt"
 	"net/http"
@@ -31,6 +32,17 @@ func NewServer(service Service) *http.Server {
 		service:   service,
 		validator: validator.New(),
 	}
+
+	// Custom validator for product type
+	NewServer.validator.RegisterValidation("productType", func(fl validator.FieldLevel) bool {
+		productType := fl.Field().String()
+		for _, pt := range constants.ProductTypes {
+			if pt == productType {
+				return true
+			}
+		}
+		return false
+	})
 
 	// Declare Server config
 	server := &http.Server{
