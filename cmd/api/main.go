@@ -4,6 +4,7 @@ import (
 	"WeenieHut/internal/database"
 	"WeenieHut/internal/repository"
 	"WeenieHut/internal/service"
+	"WeenieHut/internal/storage"
 	"context"
 	"fmt"
 	"log"
@@ -44,7 +45,8 @@ func main() {
 	db := database.New()
 	defer db.Close()
 	repo := repository.New(db)
-	svc := service.New(repo)
+	storage := storage.New(storage.S3Endpoint, storage.S3AccessKeyID, storage.S3SecretAccessKey)
+	svc := service.New(repo, storage)
 	serv := server.NewServer(svc)
 
 	// Create a done channel to signal when the shutdown is complete
