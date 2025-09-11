@@ -2,8 +2,10 @@ package repository
 
 import (
 	"WeenieHut/internal/model"
+	"WeenieHut/internal/service"
 	"context"
 	"fmt"
+	"strings"
 )
 
 func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (model.Product, error) {
@@ -35,4 +37,101 @@ func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (model.
 	}
 
 	return inserted, nil
+}
+
+func (q *Queries) GetProducts(ctx context.Context, filter service.ProductFilter) ([]model.Product, error) {
+	query := `
+		SELECT id, name, category, qty, price, sku, file_id, file_uri, file_thumbnail_uri, created_at, updated_at
+		FROM product
+	`
+	conds := []string{}
+	args := []interface{}{}
+	argIdx := 1
+
+	// filter by productId
+	if filter.ProductID != nil {
+		conds = append(conds, fmt.Sprintf("id = $%d", argIdx))
+		args = append(args, *filter.ProductID)
+		argIdx++
+	}
+
+	// filter by sku (exact match)
+	if filter.Sku != "" {
+		conds = append(conds, fmt.Sprintf("sku = $%d", argIdx))
+		args = append(args, filter.Sku)
+		argIdx++
+	}
+
+	// filter by category (case-insensitive exact match)
+	if filter.Category != "" {
+		conds = append(conds, fmt.Sprintf("LOWER(category) = LOWER($%d)", argIdx))
+		args = append(args, filter.Category)
+		argIdx++
+	}
+
+	// conditions
+	if len(conds) > 0 {
+		query += " WHERE " + strings.Join(conds, " AND ")
+	}
+
+	// sorting
+	switch filter.SortBy {
+	case "newest":
+		query += " ORDER BY updated_at DESC, created_at DESC"
+	case "oldest":
+		query += " ORDER BY updated_at ASC, created_at ASC"
+	case "cheapest":
+		query += " ORDER BY price ASC"
+	case "expensive":
+		query += " ORDER BY price DESC"
+	default:
+		query += " ORDER BY updated_at DESC, created_at DESC"
+	}
+
+	limit := filter.Limit
+	if limit <= 0 {
+		limit = 5
+	}
+	offset := filter.Offset
+	if offset < 0 {
+		offset = 0
+	}
+
+	query += fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
+
+	// debug log
+	fmt.Println("Executing Query:", query, "Args:", args)
+
+	rows, err := q.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var products []model.Product
+	for rows.Next() {
+		var p model.Product
+		if err := rows.Scan(
+			&p.ID,
+			&p.Name,
+			&p.Category,
+			&p.Qty,
+			&p.Price,
+			&p.SKU,
+			&p.FileID,
+			&p.FileURI,
+			&p.FileThumbnailURI,
+			&p.CreatedAt,
+			&p.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return products, nil
 }
