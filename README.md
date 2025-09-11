@@ -103,7 +103,7 @@ Create your .env file and use the .env.sample file as reference
 ```bash
  export GOOSE_DRIVER=postgres
  export GOOSE_MIGRATION_DIR=db/sql/migrations
- export GOOSE_DBSTRING="user=postgres password=postgres dbname=salty-spitoon-dev host=localhost port=5432 sslmode=disable"
+ export GOOSE_DBSTRING="user=postgres password=postgres dbname=weenie-hut-dev host=localhost port=5432 sslmode=disable"
 ```
 
 ## Create SQL query

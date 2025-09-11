@@ -3,7 +3,7 @@ services:
     image: postgres:latest
     restart: unless-stopped
     environment:
-      POSTGRES_DB: salty-spitoon-dev
+      POSTGRES_DB: weenie-hut-dev
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:

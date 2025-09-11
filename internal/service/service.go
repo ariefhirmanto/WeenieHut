@@ -14,6 +14,7 @@ type Repository interface {
 	// SelectUserByEmail(ctx context.Context, email string) (repository.SelectUserByEmailRow, error)
 	// CreateUser(ctx context.Context, arg repository.CreateUserParams) (int64, error)
 	InsertProduct(ctx context.Context, data model.Product) (model.Product, error)
+	GetProducts(ctx context.Context, filter ProductFilter) ([]model.Product, error)
 }
 
 func New(repository Repository) *Service {

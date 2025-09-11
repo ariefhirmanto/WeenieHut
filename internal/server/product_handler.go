@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func (s *Server) productHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) postProductHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		sendErrorResponse(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -40,4 +40,34 @@ func (s *Server) productHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sendResponse(w, http.StatusCreated, res)
+}
+
+func (s *Server) getProductsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		sendErrorResponse(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	query := r.URL.Query()
+
+	req := GetProductsRequest{
+		ProductID: query.Get("productId"),
+		Sku:       query.Get("sku"),
+		Category:  query.Get("category"),
+		SortBy:    query.Get("sortBy"),
+		Limit:     query.Get("limit"),
+		Offset:    query.Get("offset"),
+	}
+
+	res, err := s.service.GetProducts(r.Context(), req)
+	if err != nil {
+		if err.Error() == "no products found" {
+			sendErrorResponse(w, http.StatusNotFound, err.Error())
+		} else {
+			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	sendResponse(w, http.StatusOK, res)
 }

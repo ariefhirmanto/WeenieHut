@@ -19,6 +19,7 @@ type Service interface {
 	Login(ctx context.Context, email string, password string) (string, error)
 	Register(ctx context.Context, email string, password string) (string, error)
 	PostProduct(ctx context.Context, req PostProductRequest) (res PostProductResponse, err error)
+	GetProducts(ctx context.Context, req GetProductsRequest) (res []GetProductResponse, err error)
 }
 
 type Server struct {
