@@ -36,3 +36,19 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+func (s *Server) contentMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodPatch {
+			ct := r.Header.Get("Content-Type")
+			if !strings.EqualFold(ct, "application/json") {
+				http.Error(w, "Content-Type must be application/json", http.StatusBadRequest)
+				return
+			}
+		}
+
+		// continue to the next handler
+		next.ServeHTTP(w, r)
+	})
+}
