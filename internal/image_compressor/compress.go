@@ -10,6 +10,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -18,7 +19,7 @@ import (
 )
 
 var (
-	MaxConcurrentCompress = os.Getenv("MAX_CONCURRENT_COMPRESS")
+	MaxConcurrentCompress, _ = strconv.Atoi(os.Getenv("MAX_CONCURRENT_COMPRESS"))
 )
 
 type ImageCompressor struct {
