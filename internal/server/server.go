@@ -1,8 +1,10 @@
 package server
 
 import (
+	"WeenieHut/internal/model"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,6 +18,8 @@ import (
 type Service interface {
 	Login(ctx context.Context, email string, password string) (string, error)
 	Register(ctx context.Context, email string, password string) (string, error)
+
+	UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error)
 }
 
 type Server struct {
