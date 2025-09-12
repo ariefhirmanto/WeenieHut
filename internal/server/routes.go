@@ -16,5 +16,5 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	mux.HandleFunc("POST /v1/file", s.fileUploadHandler)
 
-	return s.authMiddleware(mux)
+	return s.contentMiddleware(s.authMiddleware(mux))
 }
