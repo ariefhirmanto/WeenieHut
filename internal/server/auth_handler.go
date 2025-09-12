@@ -129,7 +129,7 @@ func (s *Server) emailRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		Email: req.Email,
 		Token: token,
 	}
-	sendResponse(w, http.StatusOK, resp)
+	sendResponse(w, http.StatusCreated, resp)
 }
 
 func (s *Server) phoneRegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -170,5 +170,5 @@ func (s *Server) phoneRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		Phone: req.Phone,
 		Token: token,
 	}
-	sendResponse(w, http.StatusOK, resp)
+	sendResponse(w, http.StatusCreated, resp)
 }
