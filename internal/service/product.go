@@ -12,15 +12,30 @@ import (
 
 func (s *Service) PostProduct(ctx context.Context, req server.PostProductRequest) (res server.PostProductResponse, err error) {
 	//
+	// Get File Uri & Thumbnail Uri
+	//
+	var fileUri, fileThumbnailUri string
+	if req.FileID != "" {
+		file, err := s.repository.GetFileByFileID(ctx, req.FileID)
+		if err != nil {
+			return res, err
+		}
+		fileUri = file.Uri
+		fileThumbnailUri = file.ThumbnailUri
+	}
+
+	//
 	// Set Product Value
 	//
 	newProduct := model.Product{
-		Name:     req.Name,
-		Category: utils.ToPointer(req.Category),
-		Qty:      req.Qty,
-		Price:    req.Price,
-		SKU:      req.Sku,
-		FileID:   utils.ToPointer(req.FileID),
+		Name:             req.Name,
+		Category:         utils.ToPointer(req.Category),
+		Qty:              req.Qty,
+		Price:            req.Price,
+		SKU:              req.Sku,
+		FileID:           utils.ToPointer(req.FileID),
+		FileURI:          utils.ToPointer(fileUri),
+		FileThumbnailURI: utils.ToPointer(fileThumbnailUri),
 	}
 
 	//
@@ -39,13 +54,13 @@ func (s *Service) PostProduct(ctx context.Context, req server.PostProductRequest
 		Price:            insertedProduct.Price,
 		Sku:              insertedProduct.SKU,
 		FileID:           utils.PointerValue(insertedProduct.FileID, ""),
-		FileUri:          "",
-		FileThumbnailUri: "",
+		FileUri:          utils.PointerValue(insertedProduct.FileURI, ""),
+		FileThumbnailUri: utils.PointerValue(insertedProduct.FileThumbnailURI, ""),
 		CreatedAt:        insertedProduct.CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt:        insertedProduct.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 
-	return
+	return res, nil
 }
 
 type ProductFilter struct {
@@ -142,6 +157,19 @@ func (s *Service) DeleteProduct(ctx context.Context, req server.DeleteProductReq
 
 func (s *Service) UpdateProduct(ctx context.Context, req server.PutProductRequest) (res server.PutProductResponse, err error) {
 	//
+	// Get File Uri & Thumbnail Uri
+	//
+	var fileUri, fileThumbnailUri string
+	if req.FileID != "" {
+		file, err := s.repository.GetFileByFileID(ctx, req.FileID)
+		if err != nil {
+			return res, err
+		}
+		fileUri = file.Uri
+		fileThumbnailUri = file.ThumbnailUri
+	}
+
+	//
 	// Set Value for Update Product
 	//
 	productIDInt := 0
@@ -153,13 +181,15 @@ func (s *Service) UpdateProduct(ctx context.Context, req server.PutProductReques
 	}
 
 	updateData := model.Product{
-		ID:       int64(productIDInt),
-		Name:     req.Name,
-		Category: utils.ToPointer(req.Category),
-		Qty:      req.Qty,
-		Price:    req.Price,
-		SKU:      req.Sku,
-		FileID:   utils.ToPointer(req.FileID),
+		ID:               int64(productIDInt),
+		Name:             req.Name,
+		Category:         utils.ToPointer(req.Category),
+		Qty:              req.Qty,
+		Price:            req.Price,
+		SKU:              req.Sku,
+		FileID:           utils.ToPointer(req.FileID),
+		FileURI:          utils.ToPointer(fileUri),
+		FileThumbnailURI: utils.ToPointer(fileThumbnailUri),
 	}
 
 	//
