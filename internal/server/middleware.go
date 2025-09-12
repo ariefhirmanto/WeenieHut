@@ -11,7 +11,9 @@ import (
 func (s *Server) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
-		if path == "/health" || path == "/v1/login/email" || path == "/v1/login/phone" || path == "/v1/register/email" || path == "/v1/register/phone" {
+		if path == "/health" || path == "/v1/login/email" || path == "/v1/login/phone" ||
+			path == "/v1/register/email" || path == "/v1/register/phone" ||
+			(path == "/v1/product" && r.Method == "GET") {
 			next.ServeHTTP(w, r)
 			return
 		}
