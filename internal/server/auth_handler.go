@@ -118,7 +118,7 @@ func (s *Server) emailRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("failed to register: %s\n", err.Error())
 		if errors.Is(err, constants.ErrDuplicate) {
-			sendErrorResponse(w, http.StatusConflict, fmt.Sprintf("email %s already exists", user.Email))
+			sendErrorResponse(w, http.StatusConflict, fmt.Sprintf("email %s already exists", user.Email.String))
 			return
 		}
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -159,7 +159,7 @@ func (s *Server) phoneRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("failed to register: %s\n", err.Error())
 		if errors.Is(err, constants.ErrDuplicate) {
-			sendErrorResponse(w, http.StatusConflict, fmt.Sprintf("phone %s already exists", user.Phone))
+			sendErrorResponse(w, http.StatusConflict, fmt.Sprintf("phone %s already exists", user.Phone.String))
 			return
 		}
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
