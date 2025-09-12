@@ -11,7 +11,9 @@ import (
 func (s *Server) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
-		if path == "/health" || path == "/v1/login/email" || path == "/v1/login/phone" || path == "/v1/register/email" || path == "/v1/register/phone" {
+		if path == "/health" || path == "/v1/login/email" || path == "/v1/login/phone" ||
+			path == "/v1/register/email" || path == "/v1/register/phone" ||
+			(path == "/v1/product" && r.Method == "GET") {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -34,5 +36,21 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 
 		// Proceed with the next handler
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (s *Server) contentMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodPatch {
+			ct := r.Header.Get("Content-Type")
+			if !strings.EqualFold(ct, "application/json") {
+				http.Error(w, "Content-Type must be application/json", http.StatusBadRequest)
+				return
+			}
+		}
+
+		// continue to the next handler
+		next.ServeHTTP(w, r)
 	})
 }
