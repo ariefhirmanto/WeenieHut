@@ -2,6 +2,7 @@ package service
 
 import (
 	"WeenieHut/internal/model"
+	"WeenieHut/internal/repository"
 	"context"
 )
 
@@ -14,6 +15,8 @@ type Repository interface {
 	// SelectUserByEmail(ctx context.Context, email string) (repository.SelectUserByEmailRow, error)
 	// CreateUser(ctx context.Context, arg repository.CreateUserParams) (int64, error)
 	InsertProduct(ctx context.Context, data model.Product) (model.Product, error)
+	SelectProductByProductId(ctx context.Context, productIdInput int64) (repository.SelectProductByProductIdRow, error)
+	SelectPaymentDetailByUserId(ctx context.Context, userId int64) (repository.SelectPaymentDetailByUserIdRow, error)
 }
 
 func New(repository Repository) *Service {

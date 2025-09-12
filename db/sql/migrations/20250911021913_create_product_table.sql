@@ -2,6 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE product (
     id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
     category VARCHAR(100),                
     qty INTEGER NOT NULL CHECK (qty >= 0),
@@ -11,7 +12,13 @@ CREATE TABLE product (
     file_uri TEXT,
     file_thumbnail_uri TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT NOW(),
+
+    CONSTRAINT fk_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 -- +goose StatementEnd
 

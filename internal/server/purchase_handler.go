@@ -1,13 +1,12 @@
 package server
 
 import (
-	"WeenieHut/internal/constants"
 	"WeenieHut/internal/model"
+
 	"encoding/json"
-	"errors"
-	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -29,64 +28,64 @@ func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	productSellerDummy := map[string]int{
-		"Arief Hirmanto": 1,
-		"Arief":          2,
-		"Hirmanto":       3,
-	}
-
-	seller := make(map[string]string) //{sellerID:price}
+	seller := make(map[int64]int64) //{sellerID:price}
 	var products []model.ProductCart
 	var paymentdetails []model.CartPaymentDetail
 	var totalPrices int64
 	now := time.Now()
-	for _, item := range PurchaseCartRequest.PurchasedItems {
-		// query item.ProductID dari repo product, cek valid kalo bukan return 400
-		// cek quantity dari repo product, kalo kurang return 400
-		fmt.Println(item.ProductID)
-
-		// dapet seller id dari product, harusnya dari db
-		// asumsi dapet data dari nama seller
-		sellerID := productSellerDummy["Arief Hirmanto"]
-
-		// dari productID harusnya bisa dapet seller id (atau disini user id)
-		// kalo valid store
-
-		pc := model.ProductCart{
-			ProductID:        "random",
-			Name:             "celana dalam",
-			Category:         "Clothes",
-			Qty:              999 - 1,
-			Price:            1000,
-			SKU:              "randomSKU",
-			FileID:           "randomID",
-			FileURI:          "randomURI",
-			FileThumbnailURI: "randomThumbnailUri",
-			CreatedAt:        now,
-			UpdatedAt:        now, //only keep this field, all the items beside this is come from db
+	for _, item := range req.PurchasedItems {
+		productIDInt, err := strconv.ParseInt(item.ProductID, 10, 64)
+		if err != nil {
+			log.Printf("invalid productID: %s\n", err.Error())
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
 		}
+
+		productInCart, sellerID, err := s.service.GetProductByProductId(ctx, productIDInt)
+		if err != nil {
+			log.Println("error get product: %s\n", err.Error())
+			sendErrorResponse(w, http.StatusInternalServerError, "Internal Server Error")
+			return
+		}
+
+		if item.Qty <= 0 {
+			log.Printf("product qty is out")
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		if productInCart.Qty < item.Qty {
+			log.Printf("bought more than the available qty")
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		productInCart.Qty = productInCart.Qty - 1
+		productInCart.UpdatedAt = now
+		// ganti ke response type
+		products = append(products, productInCart)
+		totalPrices += productInCart.Price
 
 		_, exists := seller[sellerID]
 		if !exists {
-			seller[sellerID] = pc.price
+			seller[sellerID] = productInCart.Price
 		} else {
-			seller[sellerID] += pc.price
+			seller[sellerID] += productInCart.Price
 		}
-		products = append(products, pc)
-		totalPrices += pc.Price
+
 	}
 
-	// query repo seller. sender name, type and detail untuk dapet bankaccName, bankAccHolder, bankAccNum
-
-	for _, price := range seller { //should be id and price, or any distinguishable things
-		cartPayment := model.CartPaymentDetail{
-			BankAccountName:   "Arief Hirmanto",
-			BankAccountHolder: "Arief Hirmanto",
-			BankAccountNumber: "0210220234",
-			TotalPrice:        price,
+	for sellerID, price := range seller {
+		sellerPaymentDetail, err := s.service.GetSellerPaymentDetailBySellerId(ctx, sellerID)
+		if err != nil {
+			log.Printf("invalid seller: %s\n", err.Error())
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
 		}
-		paymentdetails = append(paymentdetails, cartPayment)
+		sellerPaymentDetail.TotalPrice = price
+		// ganti ke response type
+		paymentdetails = append(paymentdetails, sellerPaymentDetail)
 	}
+
 	// kirim data ke repo purchase: array of product dari loop diatas dan seller id
 	// purchase(products, totalPrices, paymentdetails)
 	// resp := PurchaseResponse{}

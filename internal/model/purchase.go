@@ -3,7 +3,7 @@ package model
 import "time"
 
 type ProductCart struct {
-	ProductID        string    `json:"productId"` // Any ID
+	ProductID        int64     `json:"productId"` // Any ID
 	Name             string    `json:"name"`
 	Category         string    `json:"category"`
 	Qty              int       `json:"qty"`   // Quantity before bought
@@ -19,25 +19,25 @@ type ProductCart struct {
 type CartPaymentDetail struct {
 	BankAccountName   string `json:"bankAccountName"`
 	BankAccountHolder string `json:"bankAccountHolder"`
-	BankAccountNumber string `json:"bankAccountNumber"`
+	BankAccountNumber int64  `json:"bankAccountNumber"`
 	TotalPrice        int64  `json:"totalPrice"` // Total for this seller
 }
 
-type PurchaseCartStore struct {
-	PurchasedItems []PurchaseCartItem `json:"purchasedItems"`
-	TotalPrice     int64              `json:"totalPrice`
-	PaymentDetails []PaymentDetail    `json:"paymentDetails"`
-}
+// type PurchaseCartStore struct {
+// 	PurchasedItems []PurchaseCartItem  `json:"purchasedItems"`
+// 	TotalPrice     int64               `json:"totalPrice`
+// 	PaymentDetails []CartPaymentDetail `json:"paymentDetails"`
+// }
 
-type PurchaseCartReturn struct {
-	PurchaseID     string             `json:"purchaseID"`
-	PurchasedItems []PurchaseCartItem `json:"purchasedItems"`
-	TotalPrice     int64              `json:"totalPrice`
-	PaymentDetails []PaymentDetail    `json:"paymentDetails"`
-}
+// type PurchaseCartReturn struct {
+// 	PurchaseID     string             `json:"purchaseID"`
+// 	PurchasedItems []PurchaseCartItem `json:"purchasedItems"`
+// 	TotalPrice     int64              `json:"totalPrice`
+// 	PaymentDetails []CartPaymentDetail    `json:"paymentDetails"`
+// }
 
-// can be adjusted, start with a simple item details
-type PurchaseCartItem struct {
-	ProductID string `json:"productId"`
-	Qty       int    `json:"qty"`
-}
+// // can be adjusted, start with a simple item details
+// type PurchaseCartItem struct {
+// 	ProductID string `json:"productId"`
+// 	Qty       int    `json:"qty"`
+// }

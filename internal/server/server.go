@@ -2,6 +2,7 @@ package server
 
 import (
 	"WeenieHut/internal/constants"
+	"WeenieHut/internal/model"
 	"context"
 	"fmt"
 	"net/http"
@@ -18,6 +19,8 @@ type Service interface {
 	Login(ctx context.Context, email string, password string) (string, error)
 	Register(ctx context.Context, email string, password string) (string, error)
 	PostProduct(ctx context.Context, req PostProductRequest) (res PostProductResponse, err error)
+	GetProductByProductId(ctx context.Context, productIdInput int64) (model.ProductCart, int64, error)
+	GetSellerPaymentDetailBySellerId(ctx context.Context, sellerID int64) (model.CartPaymentDetail, error)
 }
 
 type Server struct {
