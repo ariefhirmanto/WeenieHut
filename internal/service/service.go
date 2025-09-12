@@ -2,6 +2,7 @@ package service
 
 import (
 	"WeenieHut/internal/model"
+	"WeenieHut/internal/repository"
 	"context"
 )
 
@@ -13,12 +14,19 @@ type Service struct {
 
 // note: not ideal, might need adapter layer because return type is defined in the repository package
 type Repository interface {
-	// SelectUserByEmail(ctx context.Context, email string) (repository.SelectUserByEmailRow, error)
-	// CreateUser(ctx context.Context, arg repository.CreateUserParams) (int64, error)
-	InsertFile(ctx context.Context, file model.File) (model.File, error)
+	// User
 	InsertUser(ctx context.Context, user model.User, passwordHash string) (model.User, error)
 	SelectUserCredentialsByEmail(ctx context.Context, phone string) (model.User, error)
 	SelectUserCredentialsByPhone(ctx context.Context, phone string) (model.User, error)
+	GetUserProfile(ctx context.Context, userId int64) (model.User, error)
+	UpdateUserProfile(ctx context.Context, param repository.UpdateUserProfileParams) (model.User, error)
+	IsEmailExist(ctx context.Context, email string, excludeUserID int64) (bool, error)
+	IsPhoneExist(ctx context.Context, phone string, excludeUserID int64) (bool, error)
+	IsUserExist(ctx context.Context, userID int64) (bool, error)
+
+	// File
+	InsertFile(ctx context.Context, file model.File) (model.File, error)
+	GetFileUpload(ctx context.Context, id int64) (model.File, error)
 }
 
 type Storage interface {
