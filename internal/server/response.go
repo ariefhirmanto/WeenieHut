@@ -33,12 +33,20 @@ func sendErrorResponse(w http.ResponseWriter, statusCode int, error string) {
 
 type LoginResponse struct {
 	Email string `json:"email"`
+	Phone string `json:"phone"`
 	Token string `json:"token"`
 }
 
 type RegisterResponse struct {
 	Email string `json:"email"`
+	Phone string `json:"phone"`
 	Token string `json:"token"`
+}
+
+type FileUploadResponse struct {
+	FileID           string `json:"fileId"`
+	FileUri          string `json:"fileUri"`
+	FileThumbnailUri string `json:"fileThumbnailUri"`
 }
 
 type PostProductResponse struct {

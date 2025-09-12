@@ -6,7 +6,9 @@ import (
 )
 
 type Service struct {
-	repository Repository
+	repository      Repository
+	storage         Storage
+	imageCompressor ImageCompressor
 }
 
 // note: not ideal, might need adapter layer because return type is defined in the repository package
@@ -19,10 +21,24 @@ type Repository interface {
 	GetProducts(ctx context.Context, filter ProductFilter) (res []model.Product, err error)
 	UpdateProduct(ctx context.Context, data model.Product) (res model.Product, err error)
 	DeleteProductByID(ctx context.Context, id int64) (err error)
+	InsertFile(ctx context.Context, file model.File) (model.File, error)
+	InsertUser(ctx context.Context, user model.User, passwordHash string) (model.User, error)
+	SelectUserCredentialsByEmail(ctx context.Context, phone string) (model.User, error)
+	SelectUserCredentialsByPhone(ctx context.Context, phone string) (model.User, error)
 }
 
-func New(repository Repository) *Service {
+type Storage interface {
+	UploadFile(ctx context.Context, bucket, localPath, remotePath string) (string, error)
+}
+
+type ImageCompressor interface {
+	Compress(ctx context.Context, src string) (string, error)
+}
+
+func New(repository Repository, storage Storage, imageCompressor ImageCompressor) *Service {
 	return &Service{
-		repository: repository,
+		repository:      repository,
+		storage:         storage,
+		imageCompressor: imageCompressor,
 	}
 }

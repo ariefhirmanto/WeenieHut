@@ -1,9 +1,11 @@
 package server
 
 import (
+	"WeenieHut/internal/model"
 	"WeenieHut/internal/constants"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,8 +18,12 @@ import (
 )
 
 type Service interface {
+	EmailLogin(ctx context.Context, user string, password string) (string, string, error)
 	Login(ctx context.Context, email string, password string) (string, error)
-	Register(ctx context.Context, email string, password string) (string, error)
+	PhoneLogin(ctx context.Context, phone string, password string) (string, string, error)
+	Register(ctx context.Context, user model.User, password string) (string, error)
+
+	UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error)
 	PostProduct(ctx context.Context, req PostProductRequest) (res PostProductResponse, err error)
 	GetProducts(ctx context.Context, req GetProductsRequest) (res []GetProductResponse, err error)
 	UpdateProduct(ctx context.Context, req PutProductRequest) (res PutProductResponse, err error)
