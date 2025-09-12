@@ -28,7 +28,7 @@ func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	seller := make(map[int64]model.StoreCartItems) //{sellerID:price}
+	seller := make(map[int64]model.StoreCartItems)
 	var products []model.ProductCart
 	var paymentdetails []model.CartPaymentDetail
 	var totalPrices int64
@@ -60,7 +60,6 @@ func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		productInCart.UpdatedAt = now
-		// ganti ke response type
 		products = append(products, productInCart)
 		totalPrices += productInCart.Price
 
@@ -111,15 +110,9 @@ func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		sellerPaymentDetail.TotalPrice = cartItems.Price
-		// ganti ke response type
 		paymentdetails = append(paymentdetails, sellerPaymentDetail)
 	}
 
-	// dapet cart id
-
-	// kirim data ke repo purchase: array of product dari loop diatas dan seller id
-	// purchase(products, totalPrices, paymentdetails)
-	// resp := PurchaseResponse{}
 	resp := formatOutput(products, paymentdetails, cartIDfromDB, totalPrices)
 	sendResponse(w, http.StatusOK, resp)
 }
