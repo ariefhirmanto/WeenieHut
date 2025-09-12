@@ -16,6 +16,9 @@ type Repository interface {
 	// SelectUserByEmail(ctx context.Context, email string) (repository.SelectUserByEmailRow, error)
 	// CreateUser(ctx context.Context, arg repository.CreateUserParams) (int64, error)
 	InsertFile(ctx context.Context, file model.File) (model.File, error)
+	InsertUser(ctx context.Context, user model.User, passwordHash string) (model.User, error)
+	SelectUserCredentialsByEmail(ctx context.Context, phone string) (model.User, error)
+	SelectUserCredentialsByPhone(ctx context.Context, phone string) (model.User, error)
 }
 
 type Storage interface {
