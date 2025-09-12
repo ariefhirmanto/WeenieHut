@@ -81,3 +81,59 @@ func (q *Queries) SelectPaymentDetailByUserId(ctx context.Context, userId int64)
 	)
 	return i, err
 }
+
+const insertCart = `-- name: InsertCart :one
+INSERT INTO carts (
+    total_price,
+    sender_name,
+    sender_contact_type,
+    sender_contact_detail
+) VALUES ($1, $2, $3, $4)
+RETURNING id`
+
+type InsertCartRow struct {
+	TotalPrice          int64
+	SenderName          string
+	SenderContactType   string
+	SenderContactDetail string
+}
+
+func (q *Queries) InsertCart(ctx context.Context, arg InsertCartRow) (int64, error) {
+	var id int64
+	err := q.db.QueryRowContext(ctx, insertCart,
+		arg.TotalPrice,
+		arg.SenderName,
+		arg.SenderContactType,
+		arg.SenderContactDetail,
+	).Scan(&id)
+	return id, err
+}
+
+const insertCartItem = `-- name: InsertCartItem :one
+INSERT INTO cart_items (
+    cart_id,
+    seller_id,
+    product_id,
+    qty,
+    price
+) VALUES ($1, $2, $3, $4, $5)`
+
+type InsertCartItemRow struct {
+	CartID    int64
+	SellerID  int64
+	ProductID int64
+	Qty       int
+	Price     int64
+}
+
+func (q *Queries) InsertCartItem(ctx context.Context, arg InsertCartItemRow) (int64, error) {
+	var id int64
+	err := q.db.QueryRowContext(ctx, insertCartItem,
+		arg.CartID,
+		arg.SellerID,
+		arg.ProductID,
+		arg.Qty,
+		arg.Price,
+	).Scan(&id)
+	return id, err
+}

@@ -23,6 +23,21 @@ type CartPaymentDetail struct {
 	TotalPrice        int64  `json:"totalPrice"` // Total for this seller
 }
 
+type StoreCart struct {
+	TotalPrice          int64  `json:"totalPrice"`
+	SenderName          string `json:"senderName"`
+	SenderContactType   string `json:"senderContactType"`
+	SenderContactDetail string `json:"senderContactDetail"`
+}
+
+type StoreCartItems struct {
+	CartID    int64
+	SellerID  int64
+	ProductID int64
+	Qty       int
+	Price     int64
+}
+
 // type PurchaseCartStore struct {
 // 	PurchasedItems []PurchaseCartItem  `json:"purchasedItems"`
 // 	TotalPrice     int64               `json:"totalPrice`

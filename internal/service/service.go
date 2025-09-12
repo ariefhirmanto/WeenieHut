@@ -17,6 +17,8 @@ type Repository interface {
 	InsertProduct(ctx context.Context, data model.Product) (model.Product, error)
 	SelectProductByProductId(ctx context.Context, productIdInput int64) (repository.SelectProductByProductIdRow, error)
 	SelectPaymentDetailByUserId(ctx context.Context, userId int64) (repository.SelectPaymentDetailByUserIdRow, error)
+	InsertCart(ctx context.Context, arg repository.InsertCartRow) (int64, error)
+	InsertCartItem(ctx context.Context, arg repository.InsertCartItemRow) (int64, error)
 }
 
 func New(repository Repository) *Service {

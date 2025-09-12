@@ -21,6 +21,8 @@ type Service interface {
 	PostProduct(ctx context.Context, req PostProductRequest) (res PostProductResponse, err error)
 	GetProductByProductId(ctx context.Context, productIdInput int64) (model.ProductCart, int64, error)
 	GetSellerPaymentDetailBySellerId(ctx context.Context, sellerID int64) (model.CartPaymentDetail, error)
+	PushCart(ctx context.Context, cart model.StoreCart) (int64, error)
+	PushCartItem(ctx context.Context, cartItem model.StoreCartItems) error
 }
 
 type Server struct {
