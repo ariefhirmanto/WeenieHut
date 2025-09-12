@@ -16,8 +16,9 @@ import (
 )
 
 type Service interface {
-	Login(ctx context.Context, email string, password string) (string, error)
-	Register(ctx context.Context, email string, password string) (string, error)
+	EmailLogin(ctx context.Context, user string, password string) (string, string, error)
+	PhoneLogin(ctx context.Context, phone string, password string) (string, string, error)
+	Register(ctx context.Context, user model.User, password string) (string, error)
 
 	UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error)
 }
