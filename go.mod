@@ -15,6 +15,8 @@ require (
 	golang.org/x/crypto v0.41.0
 )
 
+require github.com/lib/pq v1.10.9
+
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
