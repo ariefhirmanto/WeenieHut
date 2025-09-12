@@ -1,7 +1,9 @@
 package server
 
 import (
+	"WeenieHut/internal/constants"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strings"
@@ -35,7 +37,16 @@ func (s *Server) postProductHandler(w http.ResponseWriter, r *http.Request) {
 	res, err := s.service.PostProduct(ctx, req)
 	if err != nil {
 		log.Println("failed to create product:", err)
-		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+
+		switch {
+		case errors.Is(err, constants.ErrFileIDNotValid):
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		case errors.Is(err, constants.ErrDuplicateSKU):
+			sendErrorResponse(w, http.StatusConflict, err.Error())
+			sendErrorResponse(w, http.StatusUnauthorized, err.Error())
+		default:
+			sendErrorResponse(w, http.StatusInternalServerError, "internal server error")
+		}
 		return
 	}
 
@@ -85,10 +96,10 @@ func (s *Server) deleteProductHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := s.service.DeleteProduct(r.Context(), req)
 	if err != nil {
-		if err.Error() == "product not found" {
+		if errors.Is(err, constants.ErrProductNotFound) {
 			sendErrorResponse(w, http.StatusNotFound, err.Error())
 		} else {
-			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+			sendErrorResponse(w, http.StatusInternalServerError, "internal server error")
 		}
 		return
 	}
@@ -125,10 +136,15 @@ func (s *Server) updateProductHandler(w http.ResponseWriter, r *http.Request) {
 
 	res, err := s.service.UpdateProduct(r.Context(), req)
 	if err != nil {
-		if err.Error() == "product not found" {
+		switch {
+		case errors.Is(err, constants.ErrFileIDNotValid):
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		case errors.Is(err, constants.ErrProductNotFound):
 			sendErrorResponse(w, http.StatusNotFound, err.Error())
-		} else {
-			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		case errors.Is(err, constants.ErrDuplicateSKU):
+			sendErrorResponse(w, http.StatusConflict, err.Error())
+		default:
+			sendErrorResponse(w, http.StatusInternalServerError, "internal server error")
 		}
 		return
 	}

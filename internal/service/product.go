@@ -1,6 +1,7 @@
 package service
 
 import (
+	"WeenieHut/internal/constants"
 	"WeenieHut/internal/model"
 	"WeenieHut/internal/server"
 	"WeenieHut/internal/utils"
@@ -18,6 +19,9 @@ func (s *Service) PostProduct(ctx context.Context, req server.PostProductRequest
 	if req.FileID != "" {
 		file, err := s.repository.GetFileByFileID(ctx, req.FileID)
 		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return res, constants.ErrFileIDNotValid
+			}
 			return res, err
 		}
 		fileUri = file.Uri
@@ -43,7 +47,10 @@ func (s *Service) PostProduct(ctx context.Context, req server.PostProductRequest
 	//
 	insertedProduct, err := s.repository.InsertProduct(ctx, newProduct)
 	if err != nil {
-		return
+		if errors.Is(err, constants.ErrDuplicateSKU) {
+			return res, constants.ErrDuplicateSKU
+		}
+		return res, err
 	}
 
 	res = server.PostProductResponse{
@@ -147,7 +154,7 @@ func (s *Service) DeleteProduct(ctx context.Context, req server.DeleteProductReq
 	err = s.repository.DeleteProductByID(ctx, int64(productIDInt))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return errors.New("product not found")
+			return constants.ErrProductNotFound
 		}
 		return err
 	}
@@ -163,6 +170,9 @@ func (s *Service) UpdateProduct(ctx context.Context, req server.PutProductReques
 	if req.FileID != "" {
 		file, err := s.repository.GetFileByFileID(ctx, req.FileID)
 		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return res, constants.ErrFileIDNotValid
+			}
 			return res, err
 		}
 		fileUri = file.Uri
@@ -198,7 +208,10 @@ func (s *Service) UpdateProduct(ctx context.Context, req server.PutProductReques
 	val, err := s.repository.UpdateProduct(ctx, updateData)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return res, errors.New("product not found")
+			return res, constants.ErrProductNotFound
+		}
+		if errors.Is(err, constants.ErrDuplicateSKU) {
+			return res, errors.New("sku already exists (per account basis)")
 		}
 		return res, err
 	}

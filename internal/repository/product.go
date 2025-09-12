@@ -1,11 +1,15 @@
 package repository
 
 import (
+	"WeenieHut/internal/constants"
 	"WeenieHut/internal/model"
 	"WeenieHut/internal/service"
 	"context"
+	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/lib/pq"
 )
 
 func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (res model.Product, err error) {
@@ -32,6 +36,9 @@ func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (res mo
 	).Scan(&inserted.ID, &inserted.CreatedAt, &inserted.UpdatedAt)
 
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			return model.Product{}, constants.ErrDuplicateSKU
+		}
 		return model.Product{}, fmt.Errorf("insert product: %w", err)
 	}
 
@@ -171,6 +178,10 @@ func (q *Queries) UpdateProduct(ctx context.Context, data model.Product) (res mo
 		&updated.UpdatedAt,
 	)
 	if err != nil {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
+			return model.Product{}, constants.ErrDuplicateSKU
+		}
 		return model.Product{}, fmt.Errorf("update product: %w", err)
 	}
 

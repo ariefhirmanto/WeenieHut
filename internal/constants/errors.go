@@ -8,5 +8,9 @@ var (
 	ErrDuplicate         = errors.New("duplicate items")
 
 	ErrInvalidFileType = errors.New("invalid file type")
-	ErrMaximumFileSize = errors.New("Size exceeds the maximum allowed file size")
+	ErrMaximumFileSize = errors.New("size exceeds the maximum allowed file size")
+
+	ErrFileIDNotValid  = errors.New("fileId is not valid / exists")
+	ErrDuplicateSKU    = errors.New("duplicate sku")
+	ErrProductNotFound = errors.New("productId is not found")
 )
