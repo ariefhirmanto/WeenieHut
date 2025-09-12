@@ -13,18 +13,20 @@ type Service struct {
 
 // note: not ideal, might need adapter layer because return type is defined in the repository package
 type Repository interface {
-	// SelectUserByEmail(ctx context.Context, email string) (repository.SelectUserByEmailRow, error)
-	// CreateUser(ctx context.Context, arg repository.CreateUserParams) (int64, error)
+	// User Repository
+	InsertUser(ctx context.Context, user model.User, passwordHash string) (model.User, error)
+	SelectUserCredentialsByEmail(ctx context.Context, phone string) (model.User, error)
+	SelectUserCredentialsByPhone(ctx context.Context, phone string) (model.User, error)
+
+	// File Repository
+	InsertFile(ctx context.Context, file model.File) (model.File, error)
+	GetFileByFileID(ctx context.Context, fileID string) (res model.File, err error)
 
 	// Product Repository
 	InsertProduct(ctx context.Context, data model.Product) (res model.Product, err error)
 	GetProducts(ctx context.Context, filter ProductFilter) (res []model.Product, err error)
 	UpdateProduct(ctx context.Context, data model.Product) (res model.Product, err error)
 	DeleteProductByID(ctx context.Context, id int64) (err error)
-	InsertFile(ctx context.Context, file model.File) (model.File, error)
-	InsertUser(ctx context.Context, user model.User, passwordHash string) (model.User, error)
-	SelectUserCredentialsByEmail(ctx context.Context, phone string) (model.User, error)
-	SelectUserCredentialsByPhone(ctx context.Context, phone string) (model.User, error)
 }
 
 type Storage interface {
