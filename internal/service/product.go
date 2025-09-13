@@ -3,7 +3,6 @@ package service
 import (
 	"WeenieHut/internal/constants"
 	"WeenieHut/internal/model"
-	"WeenieHut/internal/server"
 	"WeenieHut/internal/utils"
 	"context"
 	"database/sql"
@@ -11,7 +10,7 @@ import (
 	"strconv"
 )
 
-func (s *Service) PostProduct(ctx context.Context, req server.PostProductRequest) (res server.PostProductResponse, err error) {
+func (s *Service) PostProduct(ctx context.Context, req model.PostProductRequest) (res model.PostProductResponse, err error) {
 	//
 	// Get File Uri & Thumbnail Uri
 	//
@@ -53,7 +52,7 @@ func (s *Service) PostProduct(ctx context.Context, req server.PostProductRequest
 		return res, err
 	}
 
-	res = server.PostProductResponse{
+	res = model.PostProductResponse{
 		ProductID:        strconv.Itoa(int(insertedProduct.ID)),
 		Name:             insertedProduct.Name,
 		Category:         utils.PointerValue(insertedProduct.Category, ""),
@@ -70,16 +69,7 @@ func (s *Service) PostProduct(ctx context.Context, req server.PostProductRequest
 	return res, nil
 }
 
-type ProductFilter struct {
-	ProductID *int64
-	Sku       string
-	Category  string
-	SortBy    string
-	Limit     int
-	Offset    int
-}
-
-func (s *Service) GetProducts(ctx context.Context, req server.GetProductsRequest) (res []server.GetProductResponse, err error) {
+func (s *Service) GetProducts(ctx context.Context, req model.GetProductsRequest) (res []model.GetProductResponse, err error) {
 	var productIDPtr *int64
 	if req.ProductID != "" {
 		if productIDInt, err := strconv.Atoi(req.ProductID); err == nil {
@@ -89,7 +79,7 @@ func (s *Service) GetProducts(ctx context.Context, req server.GetProductsRequest
 
 	limitInt, _ := strconv.Atoi(req.Limit)
 	offsetInt, _ := strconv.Atoi(req.Offset)
-	filter := ProductFilter{
+	filter := model.ProductFilter{
 		ProductID: productIDPtr,
 		Sku:       req.Sku,
 		Category:  req.Category,
@@ -122,9 +112,9 @@ func (s *Service) GetProducts(ctx context.Context, req server.GetProductsRequest
 		return nil, errors.New("no products found")
 	}
 
-	res = make([]server.GetProductResponse, 0, len(products))
+	res = make([]model.GetProductResponse, 0, len(products))
 	for _, p := range products {
-		res = append(res, server.GetProductResponse{
+		res = append(res, model.GetProductResponse{
 			ProductID:        strconv.FormatInt(p.ID, 10),
 			Name:             p.Name,
 			Category:         utils.PointerValue(p.Category, ""),
@@ -142,7 +132,7 @@ func (s *Service) GetProducts(ctx context.Context, req server.GetProductsRequest
 	return
 }
 
-func (s *Service) DeleteProduct(ctx context.Context, req server.DeleteProductRequest) (err error) {
+func (s *Service) DeleteProduct(ctx context.Context, req model.DeleteProductRequest) (err error) {
 	productIDInt := 0
 	if req.ProductID != "" {
 		productIDInt, err = strconv.Atoi(req.ProductID)
@@ -162,7 +152,7 @@ func (s *Service) DeleteProduct(ctx context.Context, req server.DeleteProductReq
 	return
 }
 
-func (s *Service) UpdateProduct(ctx context.Context, req server.PutProductRequest) (res server.PutProductResponse, err error) {
+func (s *Service) UpdateProduct(ctx context.Context, req model.PutProductRequest) (res model.PutProductResponse, err error) {
 	//
 	// Get File Uri & Thumbnail Uri
 	//
@@ -216,7 +206,7 @@ func (s *Service) UpdateProduct(ctx context.Context, req server.PutProductReques
 		return res, err
 	}
 
-	res = server.PutProductResponse{
+	res = model.PutProductResponse{
 		ProductID:        strconv.Itoa(int(val.ID)),
 		Name:             val.Name,
 		Category:         utils.PointerValue(val.Category, ""),

@@ -3,7 +3,6 @@ package repository
 import (
 	"WeenieHut/internal/constants"
 	"WeenieHut/internal/model"
-	"WeenieHut/internal/service"
 	"context"
 	"errors"
 	"fmt"
@@ -47,7 +46,7 @@ func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (res mo
 	return
 }
 
-func (q *Queries) GetProducts(ctx context.Context, filter service.ProductFilter) (res []model.Product, err error) {
+func (q *Queries) GetProducts(ctx context.Context, filter model.ProductFilter) (res []model.Product, err error) {
 	query := `
 		SELECT id, name, category, qty, price, sku, file_id, file_uri, file_thumbnail_uri, created_at, updated_at
 		FROM product

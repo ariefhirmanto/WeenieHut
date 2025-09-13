@@ -20,7 +20,6 @@ import (
 
 type Service interface {
 	EmailLogin(ctx context.Context, user string, password string) (string, string, error)
-	Login(ctx context.Context, email string, password string) (string, error)
 	PhoneLogin(ctx context.Context, phone string, password string) (string, string, error)
 	Register(ctx context.Context, user model.User, password string) (string, error)
 
@@ -30,10 +29,10 @@ type Service interface {
 	IsUserExist(ctx context.Context, userID int64) (bool, error)
 
 	UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error)
-	PostProduct(ctx context.Context, req PostProductRequest) (res PostProductResponse, err error)
-	GetProducts(ctx context.Context, req GetProductsRequest) (res []GetProductResponse, err error)
-	UpdateProduct(ctx context.Context, req PutProductRequest) (res PutProductResponse, err error)
-	DeleteProduct(ctx context.Context, req DeleteProductRequest) (err error)
+	PostProduct(ctx context.Context, req model.PostProductRequest) (res model.PostProductResponse, err error)
+	GetProducts(ctx context.Context, req model.GetProductsRequest) (res []model.GetProductResponse, err error)
+	UpdateProduct(ctx context.Context, req model.PutProductRequest) (res model.PutProductResponse, err error)
+	DeleteProduct(ctx context.Context, req model.DeleteProductRequest) (err error)
 }
 
 type Server struct {
