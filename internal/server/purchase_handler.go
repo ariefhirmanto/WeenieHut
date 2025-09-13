@@ -157,6 +157,7 @@ func (s *Server) purchasePaymentHandler(w http.ResponseWriter, r *http.Request) 
 		default:
 			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		}
+		return
 	}
 
 	sendResponse(w, http.StatusAccepted, nil)
