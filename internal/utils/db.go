@@ -33,8 +33,7 @@ func IsDBError(err error) bool {
 	}
 
 	// Check for driver errors
-	var driverErr driver.ErrBadConn
-	if errors.As(err, &driverErr) {
+	if errors.Is(err, driver.ErrBadConn) {
 		return true
 	}
 
