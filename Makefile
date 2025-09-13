@@ -76,4 +76,12 @@ db-migrate-down:
 db-generate-sql:
 	@sqlc generate
 
+deploy-local:
+	@if docker compose --profile deploy up --build 2>/dev/null; then \
+		: ; \
+	else \
+		echo "Falling back to Docker Compose V1"; \
+		docker-compose --profile deploy up --build; \
+	fi
+
 .PHONY: all build run test clean watch lint docker-run docker-down itest db-migrate-create db-migrate-up db-migrate-down db-generate-sql
