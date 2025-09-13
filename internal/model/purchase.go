@@ -1,0 +1,58 @@
+package model
+
+import "time"
+
+type ProductCart struct {
+	ProductID        int64     `json:"productId"` // Any ID
+	Name             string    `json:"name"`
+	Category         string    `json:"category"`
+	Qty              int       `json:"qty"`   // Quantity before bought
+	Price            int64     `json:"price"` // Price per item
+	SKU              string    `json:"sku"`
+	FileID           string    `json:"fileId"`
+	FileURI          string    `json:"fileUri"`          // Related file URI
+	FileThumbnailURI string    `json:"fileThumbnailUri"` // Related thumbnail URI
+	CreatedAt        time.Time `json:"createdAt"`
+	UpdatedAt        time.Time `json:"updatedAt"`
+}
+
+type CartPaymentDetail struct {
+	BankAccountName   string `json:"bankAccountName"`
+	BankAccountHolder string `json:"bankAccountHolder"`
+	BankAccountNumber int64  `json:"bankAccountNumber"`
+	TotalPrice        int64  `json:"totalPrice"` // Total for this seller
+}
+
+type StoreCart struct {
+	TotalPrice          int64  `json:"totalPrice"`
+	SenderName          string `json:"senderName"`
+	SenderContactType   string `json:"senderContactType"`
+	SenderContactDetail string `json:"senderContactDetail"`
+}
+
+type StoreCartItems struct {
+	CartID    int64
+	SellerID  int64
+	ProductID int64
+	Qty       int
+	Price     int64
+}
+
+// type PurchaseCartStore struct {
+// 	PurchasedItems []PurchaseCartItem  `json:"purchasedItems"`
+// 	TotalPrice     int64               `json:"totalPrice`
+// 	PaymentDetails []CartPaymentDetail `json:"paymentDetails"`
+// }
+
+// type PurchaseCartReturn struct {
+// 	PurchaseID     string             `json:"purchaseID"`
+// 	PurchasedItems []PurchaseCartItem `json:"purchasedItems"`
+// 	TotalPrice     int64              `json:"totalPrice`
+// 	PaymentDetails []CartPaymentDetail    `json:"paymentDetails"`
+// }
+
+// // can be adjusted, start with a simple item details
+// type PurchaseCartItem struct {
+// 	ProductID string `json:"productId"`
+// 	Qty       int    `json:"qty"`
+// }

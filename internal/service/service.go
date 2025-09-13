@@ -15,6 +15,7 @@ type Service struct {
 // note: not ideal, might need adapter layer because return type is defined in the repository package
 type Repository interface {
 	// User
+	// User Repository
 	InsertUser(ctx context.Context, user model.User, passwordHash string) (model.User, error)
 	SelectUserCredentialsByEmail(ctx context.Context, phone string) (model.User, error)
 	SelectUserCredentialsByPhone(ctx context.Context, phone string) (model.User, error)
@@ -25,8 +26,24 @@ type Repository interface {
 	IsUserExist(ctx context.Context, userID int64) (bool, error)
 
 	// File
-	InsertFile(ctx context.Context, file model.File) (model.File, error)
 	GetFileUpload(ctx context.Context, id int64) (model.File, error)
+
+	// File Repository
+	InsertFile(ctx context.Context, file model.File) (model.File, error)
+	GetFileByFileID(ctx context.Context, fileID string) (res model.File, err error)
+	FileExists(ctx context.Context, fileID string) (bool, error)
+
+	// Product Repository
+	InsertProduct(ctx context.Context, data model.Product) (res model.Product, err error)
+	GetProducts(ctx context.Context, filter model.ProductFilter) (res []model.Product, err error)
+	UpdateProduct(ctx context.Context, data model.Product) (res model.Product, err error)
+	DeleteProductByID(ctx context.Context, id int64) (err error)
+	SelectProductByProductId(ctx context.Context, productIdInput int64) (repository.SelectProductByProductIdRow, error)
+	SelectPaymentDetailByUserId(ctx context.Context, userId int64) (repository.SelectPaymentDetailByUserIdRow, error)
+	InsertCart(ctx context.Context, arg repository.InsertCartRow) (int64, error)
+	InsertCartItem(ctx context.Context, arg repository.InsertCartItemRow) (int64, error)
+	SelectProductsByCartId(ctx context.Context, cartId int64) ([]repository.SelectProductsByCartIdRow, error) // Note: not good but okay for now
+	CartExists(ctx context.Context, cartId int64) (bool, error)
 }
 
 type Storage interface {
