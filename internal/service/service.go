@@ -31,6 +31,7 @@ type Repository interface {
 	// File Repository
 	InsertFile(ctx context.Context, file model.File) (model.File, error)
 	GetFileByFileID(ctx context.Context, fileID string) (res model.File, err error)
+	FileExists(ctx context.Context, fileID string) (bool, error)
 
 	// Product Repository
 	InsertProduct(ctx context.Context, data model.Product) (res model.Product, err error)
@@ -41,6 +42,8 @@ type Repository interface {
 	SelectPaymentDetailByUserId(ctx context.Context, userId int64) (repository.SelectPaymentDetailByUserIdRow, error)
 	InsertCart(ctx context.Context, arg repository.InsertCartRow) (int64, error)
 	InsertCartItem(ctx context.Context, arg repository.InsertCartItemRow) (int64, error)
+	SelectProductsByCartId(ctx context.Context, cartId int64) ([]repository.SelectProductsByCartIdRow, error) // Note: not good but okay for now
+	CartExists(ctx context.Context, cartId int64) (bool, error)
 }
 
 type Storage interface {

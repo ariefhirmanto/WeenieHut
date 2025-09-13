@@ -14,7 +14,9 @@ var (
 	ErrFileNotFound    = errors.New("file not found")
 	ErrInternalServer  = errors.New("internal server error")
 
-	ErrFileIDNotValid  = errors.New("fileId is not valid / exists")
-	ErrDuplicateSKU    = errors.New("duplicate sku")
-	ErrProductNotFound = errors.New("productId is not found")
+	ErrFileIDNotValid                 = errors.New("fileId is not valid / exists")
+	ErrDuplicateSKU                   = errors.New("duplicate sku")
+	ErrProductNotFound                = errors.New("productId is not found")
+	ErrNotEqualAvailableSellersInCart = errors.New("not equal to the available sellers in the cart")
+	ErrPurchaseNotFound               = errors.New("purchase not found")
 )

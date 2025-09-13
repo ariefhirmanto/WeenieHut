@@ -74,3 +74,7 @@ type PurchasedItem struct {
 	ProductID string `json:"productId" validate:"required"`
 	Qty       int    `json:"qty" validate:"required,min=2"`
 }
+
+type PurchasePaymentRequest struct {
+	FileIDs []string `json:"fileIds" validate:"required"`
+}

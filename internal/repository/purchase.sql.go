@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -136,4 +138,120 @@ func (q *Queries) InsertCartItem(ctx context.Context, arg InsertCartItemRow) (in
 		arg.Price,
 	).Scan(&id)
 	return id, err
+}
+
+const selectProductsByCartId = `-- SelectProductsByCartId
+SELECT
+    p.id as productID,
+    p.name,
+    p.category,
+    p.price as originalPrice,
+    p.sku,
+    p.file_id as fileID,
+    p.file_uri as fileUri,
+    p.file_thumbnail_uri as fileThumbnailUri,
+    ci.qty as cartQty,
+    ci.price as cartPrice,
+    ci.seller_id as sellerID,
+    p.created_at as createdAt,
+    p.updated_at as updatedAt
+FROM cart_items ci
+JOIN product p ON ci.product_id = p.id
+WHERE ci.cart_id = $1`
+
+type SelectProductsByCartIdRow struct {
+	ProductID        int64
+	Name             string
+	Category         *string
+	OriginalPrice    int64
+	SKU              string
+	FileID           *string
+	FileURI          *string
+	FileThumbnailURI *string
+	CartQty          int
+	CartPrice        int64
+	SellerID         int64
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+}
+
+func (q *Queries) SelectProductsByCartId(ctx context.Context, cartId int64) ([]SelectProductsByCartIdRow, error) {
+	rows, err := q.db.QueryContext(ctx, selectProductsByCartId, cartId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SelectProductsByCartIdRow
+	for rows.Next() {
+		var i SelectProductsByCartIdRow
+		if err := rows.Scan(
+			&i.ProductID,
+			&i.Name,
+			&i.Category,
+			&i.OriginalPrice,
+			&i.SKU,
+			&i.FileID,
+			&i.FileURI,
+			&i.FileThumbnailURI,
+			&i.CartQty,
+			&i.CartPrice,
+			&i.SellerID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const selectCartById = `-- SelectCartById
+SELECT id, total_price, sender_name, sender_contact_type, sender_contact_detail
+FROM carts
+WHERE id = $1`
+
+type SelectCartByIdRow struct {
+	ID                  int64
+	TotalPrice          int64
+	SenderName          *string
+	SenderContactType   *string
+	SenderContactDetail *string
+}
+
+func (q *Queries) SelectCartById(ctx context.Context, cartId int64) (SelectCartByIdRow, error) {
+	row := q.db.QueryRowContext(ctx, selectCartById, cartId)
+	var i SelectCartByIdRow
+	err := row.Scan(
+		&i.ID,
+		&i.TotalPrice,
+		&i.SenderName,
+		&i.SenderContactType,
+		&i.SenderContactDetail,
+	)
+	return i, err
+}
+
+func (q *Queries) CartExists(ctx context.Context, cartID int64) (bool, error) {
+	query := `
+		SELECT 1 FROM carts
+		WHERE id = $1
+	`
+
+	var exists int
+	err := q.db.QueryRowContext(ctx, query, cartID).Scan(&exists)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }

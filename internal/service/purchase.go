@@ -1,9 +1,11 @@
 package service
 
 import (
+	"WeenieHut/internal/constants"
 	"WeenieHut/internal/model"
 	"WeenieHut/internal/repository"
 	"context"
+	"strconv"
 )
 
 func ptrtostring(s *string) string {
@@ -83,6 +85,62 @@ func (s *Service) PushCartItem(ctx context.Context, cartItem model.StoreCartItem
 	_, err := s.repository.InsertCartItem(ctx, params)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (s *Service) PurchasePayment(ctx context.Context, purchaseId string, fileIds []string) error {
+	// Parse purchaseId to get cartId (assuming purchaseId is actually cartId as string)
+	cartId, err := strconv.ParseInt(purchaseId, 10, 64)
+	if err != nil {
+		return constants.ErrInternalServer
+	}
+
+	// Get Cart
+	exists, err := s.repository.CartExists(ctx, cartId)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return constants.ErrPurchaseNotFound
+	}
+
+	// Get products by cartId
+	cartProducts, err := s.repository.SelectProductsByCartId(ctx, cartId)
+	if err != nil {
+		return err
+	}
+
+	if len(cartProducts) == 0 {
+		return constants.ErrProductNotFound
+	}
+
+	// Group products by seller and validate against uploaded files
+	sellerProducts := make(map[int64][]repository.SelectProductsByCartIdRow)
+	expectedFileCount := 0
+
+	for _, product := range cartProducts {
+		sellerProducts[product.SellerID] = append(sellerProducts[product.SellerID], product)
+		expectedFileCount++
+	}
+
+	// Validate file count matches cart items count
+	if len(fileIds) != expectedFileCount {
+		return constants.ErrNotEqualAvailableSellersInCart
+	}
+
+	// Check file existence
+	for _, fileId := range fileIds {
+		exists, err := s.repository.FileExists(ctx, fileId)
+		if err != nil {
+			return err
+		}
+
+		if !exists {
+			return constants.ErrFileNotFound
+		}
 	}
 
 	return nil
