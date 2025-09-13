@@ -34,15 +34,63 @@ func sendErrorResponse(w http.ResponseWriter, statusCode int, error string) {
 
 type LoginResponse struct {
 	Email string `json:"email"`
+	Phone string `json:"phone"`
 	Token string `json:"token"`
 }
 
 type RegisterResponse struct {
 	Email string `json:"email"`
+	Phone string `json:"phone"`
 	Token string `json:"token"`
 }
 
+type FileUploadResponse struct {
+	FileID           string `json:"fileId"`
+	FileUri          string `json:"fileUri"`
+	FileThumbnailUri string `json:"fileThumbnailUri"`
+}
+
+type UserResponse struct {
+	Email             string `json:"email"`
+	Phone             string `json:"phone"`
+	Name              string `json:"name"`
+	FileID            string `json:"fileId"`
+	FileURI           string `json:"fileUri"`
+	FileThumbnailURI  string `json:"fileThumbnailUri"`
+	BankAccountName   string `json:"bankAccountName"`
+	BankAccountHolder string `json:"bankAccountHolder"`
+	BankAccountNumber string `json:"bankAccountNumber"`
+}
+
 type PostProductResponse struct {
+	ProductID        string  `json:"productId"`
+	Name             string  `json:"name"`
+	Category         string  `json:"category"`
+	Qty              int     `json:"qty"`
+	Price            float64 `json:"price"`
+	Sku              string  `json:"sku"`
+	FileID           string  `json:"fileId"`
+	FileUri          string  `json:"fileUri"`
+	FileThumbnailUri string  `json:"fileThumbnailUri"`
+	CreatedAt        string  `json:"createdAt"`
+	UpdatedAt        string  `json:"updatedAt"`
+}
+
+type GetProductResponse struct {
+	ProductID        string  `json:"productId"`
+	Name             string  `json:"name"`
+	Category         string  `json:"category"`
+	Qty              int     `json:"qty"`
+	Price            float64 `json:"price"`
+	Sku              string  `json:"sku"`
+	FileID           string  `json:"fileId"`
+	FileUri          string  `json:"fileUri"`
+	FileThumbnailUri string  `json:"fileThumbnailUri"`
+	CreatedAt        string  `json:"createdAt"`
+	UpdatedAt        string  `json:"updatedAt"`
+}
+
+type PutProductResponse struct {
 	ProductID        string  `json:"productId"`
 	Name             string  `json:"name"`
 	Category         string  `json:"category"`
