@@ -2,6 +2,7 @@ package server
 
 import (
 	"WeenieHut/internal/constants"
+	"WeenieHut/internal/model"
 	"encoding/json"
 	"errors"
 	"log"
@@ -34,7 +35,7 @@ func (s *Server) postProductHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := s.service.PostProduct(ctx, req)
+	res, err := s.service.PostProduct(ctx, model.PostProductRequest(req))
 	if err != nil {
 		log.Println("failed to create product:", err)
 
@@ -70,7 +71,7 @@ func (s *Server) getProductsHandler(w http.ResponseWriter, r *http.Request) {
 		Offset:    query.Get("offset"),
 	}
 
-	res, err := s.service.GetProducts(r.Context(), req)
+	products, err := s.service.GetProducts(r.Context(), model.GetProductsRequest(req))
 	if err != nil {
 		if err.Error() == "no products found" {
 			sendErrorResponse(w, http.StatusNotFound, err.Error())
@@ -80,6 +81,10 @@ func (s *Server) getProductsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var res []GetProductResponse
+	for _, product := range products {
+		res = append(res, GetProductResponse(product))
+	}
 	sendResponse(w, http.StatusOK, res)
 }
 
@@ -94,7 +99,7 @@ func (s *Server) deleteProductHandler(w http.ResponseWriter, r *http.Request) {
 		ProductID: query.Get("productId"),
 	}
 
-	err := s.service.DeleteProduct(r.Context(), req)
+	err := s.service.DeleteProduct(r.Context(), model.DeleteProductRequest(req))
 	if err != nil {
 		if errors.Is(err, constants.ErrProductNotFound) {
 			sendErrorResponse(w, http.StatusNotFound, err.Error())
@@ -134,7 +139,7 @@ func (s *Server) updateProductHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := s.service.UpdateProduct(r.Context(), req)
+	res, err := s.service.UpdateProduct(r.Context(), model.PutProductRequest(req))
 	if err != nil {
 		switch {
 		case errors.Is(err, constants.ErrFileIDNotValid):
@@ -149,5 +154,5 @@ func (s *Server) updateProductHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sendResponse(w, http.StatusOK, res)
+	sendResponse(w, http.StatusOK, PutProductResponse(res))
 }

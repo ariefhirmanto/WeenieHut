@@ -34,7 +34,7 @@ type Repository interface {
 
 	// Product Repository
 	InsertProduct(ctx context.Context, data model.Product) (res model.Product, err error)
-	GetProducts(ctx context.Context, filter ProductFilter) (res []model.Product, err error)
+	GetProducts(ctx context.Context, filter model.ProductFilter) (res []model.Product, err error)
 	UpdateProduct(ctx context.Context, data model.Product) (res model.Product, err error)
 	DeleteProductByID(ctx context.Context, id int64) (err error)
 	SelectProductByProductId(ctx context.Context, productIdInput int64) (repository.SelectProductByProductIdRow, error)
