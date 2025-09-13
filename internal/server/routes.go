@@ -14,6 +14,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("POST /v1/login/email", s.emailLoginHandler)
 	mux.HandleFunc("POST /v1/login/phone", s.phoneLoginHandler)
 
+	mux.HandleFunc("GET /v1/user", s.getUserProfileHandler)
+	mux.HandleFunc("PUT /v1/user", s.updateUserProfileHandler)
+	mux.HandleFunc("POST /v1/user/link/phone", s.updateUserContactHandler)
+	mux.HandleFunc("POST /v1/user/link/email", s.updateUserContactHandler)
+
 	mux.HandleFunc("POST /v1/file", s.fileUploadHandler)
 	mux.HandleFunc("POST /v1/product", s.postProductHandler)
 	mux.HandleFunc("GET /v1/product", s.getProductsHandler)

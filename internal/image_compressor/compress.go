@@ -10,14 +10,16 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/nfnt/resize"
 	_ "golang.org/x/image/webp" // For decoding
 )
 
 var (
-	MaxConcurrentCompress = os.Getenv("MAX_CONCURRENT_COMPRESS")
+	MaxConcurrentCompress, _ = strconv.Atoi(os.Getenv("MAX_CONCURRENT_COMPRESS"))
 )
 
 type ImageCompressor struct {
@@ -49,7 +51,7 @@ func (cmp *ImageCompressor) compressJPEG(ctx context.Context, img image.Image) (
 	var buf bytes.Buffer
 
 	err := jpeg.Encode(&buf, img, &jpeg.Options{
-		Quality: 1,
+		Quality: 10,
 	})
 
 	if err != nil {
@@ -57,6 +59,11 @@ func (cmp *ImageCompressor) compressJPEG(ctx context.Context, img image.Image) (
 	}
 
 	return buf.Bytes(), nil
+}
+
+func (cmp *ImageCompressor) thumbnail(ctx context.Context, img image.Image, sizeInPixels int) image.Image {
+	thumbnail := resize.Thumbnail(uint(sizeInPixels), uint(sizeInPixels), img, resize.Lanczos2)
+	return thumbnail
 }
 
 func (cmp *ImageCompressor) Compress(ctx context.Context, src string) (string, error) {
@@ -78,12 +85,13 @@ func (cmp *ImageCompressor) Compress(ctx context.Context, src string) (string, e
 		return "", fmt.Errorf("error decoding file: %w", err)
 	}
 
+	thumbnail := cmp.thumbnail(ctx, img, 300)
 	var result []byte
 	switch format {
 	case "jpeg":
-		result, err = cmp.compressJPEG(ctx, img)
+		result, err = cmp.compressJPEG(ctx, thumbnail)
 	case "png":
-		result, err = cmp.compressPNG(ctx, img)
+		result, err = cmp.compressJPEG(ctx, thumbnail)
 	default:
 		return "", fmt.Errorf("unknown format: %s", format)
 	}
@@ -94,7 +102,7 @@ func (cmp *ImageCompressor) Compress(ctx context.Context, src string) (string, e
 
 	ext := filepath.Ext(src)
 	nameWithoutExt := strings.TrimSuffix(src, ext)
-	resultFilename := fmt.Sprintf("%s_compressed.%s", nameWithoutExt, format)
+	resultFilename := fmt.Sprintf("%s_compressed.%s", nameWithoutExt, "jpeg")
 
 	resultFile, err := os.Create(resultFilename)
 	if err != nil {

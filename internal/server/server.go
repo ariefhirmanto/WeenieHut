@@ -1,8 +1,9 @@
 package server
 
 import (
-	"WeenieHut/internal/model"
 	"WeenieHut/internal/constants"
+	"WeenieHut/internal/model"
+	"WeenieHut/internal/service"
 	"context"
 	"fmt"
 	"io"
@@ -23,6 +24,11 @@ type Service interface {
 	PhoneLogin(ctx context.Context, phone string, password string) (string, string, error)
 	Register(ctx context.Context, user model.User, password string) (string, error)
 
+	GetUserProfile(ctx context.Context, userId int64) (model.User, error)
+	UpdateUserProfile(ctx context.Context, params service.UpdateUserParams) (model.User, error)
+	UpdateUserContact(ctx context.Context, params service.UpdateUserParams) (model.User, error)
+	IsUserExist(ctx context.Context, userID int64) (bool, error)
+
 	UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error)
 	PostProduct(ctx context.Context, req PostProductRequest) (res PostProductResponse, err error)
 	GetProducts(ctx context.Context, req GetProductsRequest) (res []GetProductResponse, err error)
@@ -31,17 +37,22 @@ type Service interface {
 }
 
 type Server struct {
-	port      int
-	service   Service
-	validator *validator.Validate
+	port            int
+	service         Service
+	validator       *validator.Validate
+	userValidator   *UserValidator
+	responseBuilder *UserResponseBuilder
 }
 
 func NewServer(service Service) *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	v := validator.New()
 	NewServer := &Server{
-		port:      port,
-		service:   service,
-		validator: validator.New(),
+		port:            port,
+		service:         service,
+		validator:       v,
+		userValidator:   NewUserValidator(v),
+		responseBuilder: NewUserResponseBuilder(),
 	}
 
 	// Custom validator for product type

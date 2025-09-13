@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -12,11 +13,11 @@ import (
 )
 
 var (
-	S3AccessKeyID         = os.Getenv("S3_ACCESS_KEY_ID")
-	S3SecretAccessKey     = os.Getenv("S3_SECRET_ACCESS_KEY")
-	S3Endpoint            = os.Getenv("S3_ENDPOINT")
-	S3Bucket              = os.Getenv("S3_BUCKET")
-	S3MaxConcurrentUpload = os.Getenv("S3_MAX_CONCURRENT_UPLOAD")
+	S3AccessKeyID            = os.Getenv("S3_ACCESS_KEY_ID")
+	S3SecretAccessKey        = os.Getenv("S3_SECRET_ACCESS_KEY")
+	S3Endpoint               = os.Getenv("S3_ENDPOINT")
+	S3Bucket                 = os.Getenv("S3_BUCKET")
+	S3MaxConcurrentUpload, _ = strconv.Atoi(os.Getenv("S3_MAX_CONCURRENT_UPLOAD"))
 )
 
 type MinioStorage struct {

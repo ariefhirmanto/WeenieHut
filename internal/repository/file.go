@@ -3,6 +3,8 @@ package repository
 import (
 	"WeenieHut/internal/model"
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -26,6 +28,49 @@ func (q *Queries) InsertFile(ctx context.Context, data model.File) (res model.Fi
 	}
 
 	return data, nil
+}
+
+func (q *Queries) GetFileUpload(ctx context.Context, id int64) (model.File, error) {
+	query := `
+		SELECT id, uri, thumbnail_uri, size_in_bytes, created_at, updated_at FROM files
+		WHERE id = $1
+	`
+
+	row := q.db.QueryRowContext(ctx, query, id)
+	var f model.File
+	if err := row.Scan(
+		&f.ID,
+		&f.Uri,
+		&f.ThumbnailUri,
+		&f.SizeInBytes,
+		&f.CreatedAt,
+		&f.UpdatedAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return model.File{}, errors.New("file not found")
+		}
+		return model.File{}, err
+	}
+
+	return f, nil
+}
+
+func (q *Queries) FileExists(ctx context.Context, fileID string) (bool, error) {
+	query := `
+		SELECT 1 FROM files
+		WHERE id = $1
+	`
+
+	var exists int
+	err := q.db.QueryRowContext(ctx, query, fileID).Scan(&exists)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (q *Queries) GetFileByFileID(ctx context.Context, fileID string) (res model.File, err error) {

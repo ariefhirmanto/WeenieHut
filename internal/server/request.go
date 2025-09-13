@@ -20,6 +20,18 @@ type PhoneRegisterRequest struct {
 	Password string `json:"password" validate:"required,min=8,max=32"`
 }
 
+type UpdateUserProfileRequest struct {
+	FileID            string `json:"fileId"`
+	BankAccountName   string `json:"bankAccountName" validate:"omitempty,min=4,max=32"`
+	BankAccountHolder string `json:"bankAccountHolder" validate:"omitempty,min=4,max=32"`
+	BankAccountNumber string `json:"bankAccountNumber" validate:"omitempty,min=4,max=32"`
+}
+
+type UpdateUserContactRequest struct {
+	Email string `json:"email" validate:"omitempty"`
+	Phone string `json:"phone" validate:"omitempty"`
+}
+
 type PostProductRequest struct {
 	Name     string  `json:"name" validate:"required,min=4,max=32"`
 	Category string  `json:"category" validate:"required,productType"`
