@@ -1,5 +1,7 @@
 services:
   weenie-hut-api:
+    profiles:
+      - deploy
     build:
       context: .
       dockerfile: Dockerfile
