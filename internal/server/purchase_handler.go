@@ -1,6 +1,7 @@
 package server
 
 import (
+	"WeenieHut/internal/constants"
 	"WeenieHut/internal/model"
 
 	"encoding/json"
@@ -115,6 +116,51 @@ func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
 
 	resp := formatOutput(products, paymentdetails, cartIDfromDB, totalPrices)
 	sendResponse(w, http.StatusOK, resp)
+}
+
+func (s *Server) purchasePaymentHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	var req PurchasePaymentRequest
+	if r.Method != http.MethodPost {
+		sendErrorResponse(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+
+	purchaseId := r.PathValue("purchaseId")
+	if len(purchaseId) == 0 {
+		sendErrorResponse(w, http.StatusBadRequest, "purchase id cannot be empty")
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		log.Printf("invalid payload: %s\n", err.Error())
+		sendErrorResponse(w, http.StatusBadRequest, "invalid request")
+		return
+	}
+
+	err = s.validator.Struct(req)
+	if err != nil {
+		log.Printf("invalid validator: %s\n", err.Error())
+		sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = s.service.PurchasePayment(ctx, purchaseId, req.FileIDs)
+	if err != nil {
+		switch err {
+		case constants.ErrPurchaseNotFound:
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		case constants.ErrFileNotFound:
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		case constants.ErrNotEqualAvailableSellersInCart:
+			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+		default:
+			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	sendResponse(w, http.StatusAccepted, nil)
 }
 
 func formatOutput(products []model.ProductCart, paymentdetails []model.CartPaymentDetail, purchaseID int64, totalP int64) PurchaseResponse {

@@ -13,7 +13,7 @@ CREATE TABLE product (
     file_thumbnail_uri TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT uq_product_user_sku UNIQUE (user_id, sku)
+    CONSTRAINT uq_product_user_sku UNIQUE (user_id, sku),
     CONSTRAINT fk_user
         FOREIGN KEY (user_id)
         REFERENCES users(id)
