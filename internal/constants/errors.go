@@ -11,6 +11,6 @@ var (
 
 	ErrInvalidFileType = errors.New("invalid file type")
 	ErrMaximumFileSize = errors.New("size exceeds the maximum allowed file size")
-
-	ErrInternalServer = errors.New("internal server error")
+	ErrFileNotFound    = errors.New("file not found")
+	ErrInternalServer  = errors.New("internal server error")
 )
