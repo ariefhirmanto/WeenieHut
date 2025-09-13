@@ -1,6 +1,7 @@
 package server
 
 import (
+	"WeenieHut/internal/constants"
 	"WeenieHut/internal/model"
 	"WeenieHut/internal/service"
 	"context"
@@ -9,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -27,6 +29,10 @@ type Service interface {
 	IsUserExist(ctx context.Context, userID int64) (bool, error)
 
 	UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error)
+	PostProduct(ctx context.Context, req model.PostProductRequest) (res model.PostProductResponse, err error)
+	GetProducts(ctx context.Context, req model.GetProductsRequest) (res []model.GetProductResponse, err error)
+	UpdateProduct(ctx context.Context, req model.PutProductRequest) (res model.PutProductResponse, err error)
+	DeleteProduct(ctx context.Context, req model.DeleteProductRequest) (err error)
 }
 
 type Server struct {
@@ -47,6 +53,17 @@ func NewServer(service Service) *http.Server {
 		userValidator:   NewUserValidator(v),
 		responseBuilder: NewUserResponseBuilder(),
 	}
+
+	// Custom validator for product type
+	NewServer.validator.RegisterValidation("productType", func(fl validator.FieldLevel) bool {
+		productType := fl.Field().String()
+		for _, pt := range constants.ProductTypes {
+			if strings.EqualFold(pt, productType) {
+				return true
+			}
+		}
+		return false
+	})
 
 	// Declare Server config
 	server := &http.Server{
