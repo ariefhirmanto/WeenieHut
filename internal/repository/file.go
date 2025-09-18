@@ -2,17 +2,15 @@ package repository
 
 import (
 	"WeenieHut/internal/model"
+	"WeenieHut/observability"
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
-
-	"go.opentelemetry.io/otel"
 )
 
 func (q *Queries) InsertFile(ctx context.Context, data model.File) (res model.File, err error) {
-	tracer := otel.Tracer("WeenieHut")
-	ctx, span := tracer.Start(ctx, "InsertFile.repository")
+	ctx, span := observability.Tracer.Start(ctx, "repository.insert_file")
 	defer span.End()
 
 	query := `

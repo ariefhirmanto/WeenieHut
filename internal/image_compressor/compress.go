@@ -1,6 +1,7 @@
 package imagecompressor
 
 import (
+	"WeenieHut/observability"
 	"bytes"
 	"context"
 	"fmt"
@@ -15,7 +16,6 @@ import (
 	"time"
 
 	"github.com/nfnt/resize"
-	"go.opentelemetry.io/otel"
 	_ "golang.org/x/image/webp" // For decoding
 )
 
@@ -68,8 +68,7 @@ func (cmp *ImageCompressor) thumbnail(ctx context.Context, img image.Image, size
 }
 
 func (cmp *ImageCompressor) Compress(ctx context.Context, src string) (string, error) {
-	tracer := otel.Tracer("WeenieHut")
-	ctx, span := tracer.Start(ctx, "compress-span")
+	ctx, span := observability.Tracer.Start(ctx, "image_compress")
 	defer span.End()
 
 	select {

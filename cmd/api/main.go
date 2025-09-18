@@ -16,11 +16,6 @@ import (
 	"time"
 
 	"WeenieHut/internal/server"
-
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -56,7 +51,8 @@ func main() {
 	imageCompressor := imagecompressor.New(5)
 	svc := service.New(repo, storage, imageCompressor)
 	serv := server.NewServer(svc)
-	setupObservability(context.Background())
+
+	observability.SetupTracer(context.Background(), observability.OtlpEndpoint)
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
 
@@ -71,21 +67,4 @@ func main() {
 	// Wait for the graceful shutdown to complete
 	<-done
 	log.Println("Graceful shutdown complete.")
-}
-
-func setupObservability(ctx context.Context) {
-	res, err := resource.New(ctx, resource.WithAttributes(
-		semconv.ServiceNameKey.String("weenie-hut"),
-	))
-	if err != nil {
-		log.Fatalf("failed to initialize resource: %v", err)
-	}
-
-	traceExp := observability.NewOTLPTraceExporter(ctx, "localhost:4317")
-	bsp := trace.NewBatchSpanProcessor(traceExp)
-	tracerProvider := trace.NewTracerProvider(
-		trace.WithResource(res),
-		trace.WithSpanProcessor(bsp),
-	)
-	otel.SetTracerProvider(tracerProvider)
 }

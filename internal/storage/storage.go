@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"WeenieHut/observability"
 	"context"
 	"fmt"
 	"log"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"go.opentelemetry.io/otel"
 )
 
 var (
@@ -58,8 +58,7 @@ func New(
 }
 
 func (s *MinioStorage) UploadFile(ctx context.Context, bucket, localPath, remotePath string) (string, error) {
-	tracer := otel.Tracer("WeenieHut")
-	ctx, span := tracer.Start(ctx, "s3-upload-span")
+	ctx, span := observability.Tracer.Start(ctx, "storage.s3_upload")
 	defer span.End()
 
 	select {

@@ -2,17 +2,15 @@ package server
 
 import (
 	"WeenieHut/internal/constants"
+	"WeenieHut/observability"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
-
-	"go.opentelemetry.io/otel"
 )
 
 func (s *Server) fileUploadHandler(w http.ResponseWriter, r *http.Request) {
-	tracer := otel.Tracer("WeenieHut")
-	ctx, span := tracer.Start(r.Context(), "fileUploadHandler-span")
+	ctx, span := observability.Tracer.Start(r.Context(), "handler.file_upload")
 	defer span.End()
 
 	if r.Method != "POST" {
@@ -20,7 +18,7 @@ func (s *Server) fileUploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := r.ParseMultipartForm(100 << 10); err != nil { // 100 KB
+	if err := r.ParseMultipartForm(150 << 10); err != nil { // 150 KB
 		log.Printf("error parsing multipart form: %v", err)
 		sendErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("error parsing multipart form: %v", err))
 		return
