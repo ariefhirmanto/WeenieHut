@@ -72,3 +72,12 @@ func (q *Queries) FileExists(ctx context.Context, fileID string) (bool, error) {
 
 	return true, nil
 }
+
+func (q *Queries) GetFileByFileID(ctx context.Context, fileID string) (res model.File, err error) {
+	query := `SELECT * FROM files WHERE id = $1`
+	err = q.db.QueryRowContext(ctx, query, fileID).Scan(&res.ID, &res.Uri, &res.ThumbnailUri, &res.SizeInBytes, &res.CreatedAt, &res.UpdatedAt)
+	if err != nil {
+		return model.File{}, err
+	}
+	return res, nil
+}
