@@ -13,9 +13,14 @@ import (
 	"path/filepath"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel"
 )
 
 func (s *Service) UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error) {
+	tracer := otel.Tracer("WeenieHut")
+	ctx, span := tracer.Start(ctx, "UploadFile.service-span")
+	defer span.End()
+
 	var result model.File
 
 	if sizeInBytes > constants.MaxUploadSizeInBytes {

@@ -6,6 +6,7 @@ import (
 	"WeenieHut/internal/repository"
 	"WeenieHut/internal/service"
 	"WeenieHut/internal/storage"
+	"WeenieHut/observability"
 	"context"
 	"fmt"
 	"log"
@@ -15,6 +16,11 @@ import (
 	"time"
 
 	"WeenieHut/internal/server"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -46,11 +52,11 @@ func main() {
 	db := database.New()
 	defer db.Close()
 	repo := repository.New(db)
-	storage := storage.New(storage.S3Endpoint, storage.S3AccessKeyID, storage.S3SecretAccessKey, storage.Option{MaxConcurrent: 5})
+	storage := storage.New(storage.S3Endpoint, storage.S3AccessKeyID, storage.S3SecretAccessKey, storage.Option{MaxConcurrent: 25})
 	imageCompressor := imagecompressor.New(5)
 	svc := service.New(repo, storage, imageCompressor)
 	serv := server.NewServer(svc)
-
+	setupObservability(context.Background())
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
 
@@ -65,4 +71,21 @@ func main() {
 	// Wait for the graceful shutdown to complete
 	<-done
 	log.Println("Graceful shutdown complete.")
+}
+
+func setupObservability(ctx context.Context) {
+	res, err := resource.New(ctx, resource.WithAttributes(
+		semconv.ServiceNameKey.String("weenie-hut"),
+	))
+	if err != nil {
+		log.Fatalf("failed to initialize resource: %v", err)
+	}
+
+	traceExp := observability.NewOTLPTraceExporter(ctx, "localhost:4317")
+	bsp := trace.NewBatchSpanProcessor(traceExp)
+	tracerProvider := trace.NewTracerProvider(
+		trace.WithResource(res),
+		trace.WithSpanProcessor(bsp),
+	)
+	otel.SetTracerProvider(tracerProvider)
 }

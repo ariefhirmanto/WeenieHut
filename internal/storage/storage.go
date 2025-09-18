@@ -10,6 +10,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"go.opentelemetry.io/otel"
 )
 
 var (
@@ -57,6 +58,10 @@ func New(
 }
 
 func (s *MinioStorage) UploadFile(ctx context.Context, bucket, localPath, remotePath string) (string, error) {
+	tracer := otel.Tracer("WeenieHut")
+	ctx, span := tracer.Start(ctx, "s3-upload-span")
+	defer span.End()
+
 	select {
 	case s.semaphore <- struct{}{}:
 		defer func() {

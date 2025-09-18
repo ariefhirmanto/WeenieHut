@@ -6,9 +6,15 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
+	"go.opentelemetry.io/otel"
 )
 
 func (q *Queries) InsertFile(ctx context.Context, data model.File) (res model.File, err error) {
+	tracer := otel.Tracer("WeenieHut")
+	ctx, span := tracer.Start(ctx, "InsertFile.repository")
+	defer span.End()
+
 	query := `
 		INSERT INTO files (
 			uri, thumbnail_uri, created_at, updated_at

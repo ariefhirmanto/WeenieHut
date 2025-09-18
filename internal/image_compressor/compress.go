@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/nfnt/resize"
+	"go.opentelemetry.io/otel"
 	_ "golang.org/x/image/webp" // For decoding
 )
 
@@ -67,6 +68,10 @@ func (cmp *ImageCompressor) thumbnail(ctx context.Context, img image.Image, size
 }
 
 func (cmp *ImageCompressor) Compress(ctx context.Context, src string) (string, error) {
+	tracer := otel.Tracer("WeenieHut")
+	ctx, span := tracer.Start(ctx, "compress-span")
+	defer span.End()
+
 	select {
 	case cmp.semaphore <- struct{}{}:
 		defer func() { <-cmp.semaphore }()
