@@ -37,6 +37,7 @@ type Service interface {
 	GetSellerPaymentDetailBySellerId(ctx context.Context, sellerID int64) (model.CartPaymentDetail, error)
 	PushCart(ctx context.Context, cart model.StoreCart) (int64, error)
 	PushCartItem(ctx context.Context, cartItem model.StoreCartItems) error
+	PushCartAndItems(ctx context.Context, cart model.StoreCart, items map[int64]model.StoreCartItems) (int64, error)
 
 	PurchasePayment(ctx context.Context, purchaseId string, fileIds []string) error
 }

@@ -1,9 +1,11 @@
 package repository
 
 import (
+	"WeenieHut/internal/model"
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -139,6 +141,104 @@ func (q *Queries) InsertCartItem(ctx context.Context, arg InsertCartItemRow) (in
 	).Scan(&id)
 	return id, err
 }
+
+const transactionCarts = `-- Insert into carts and return the id
+BEGIN;
+
+WITH inserted_cart AS (
+    INSERT INTO carts (
+        total_price,
+        sender_name,
+        sender_contact_type,
+        sender_contact_detail
+    ) VALUES ($1, $2, $3, $4)
+    RETURNING id
+)`
+
+const transactionItems = `
+INSERT INTO cart_items (
+    cart_id,
+    seller_id,
+    product_id,
+    qty,
+    price
+)
+VALUES ((SELECT id FROM inserted_cart), 
+`
+
+func (q *Queries) InsertCartTransaction(ctx context.Context, arg model.StoreCart, items map[int64]model.StoreCartItems) (int64, error) {
+	i := 0
+	queryStr := transactionCarts
+
+	args := []interface{}{
+		arg.TotalPrice,
+		arg.SenderName,
+		arg.SenderContactType,
+		arg.SenderContactDetail,
+	}
+
+	for _, item := range items {
+		queryStr = queryStr + transactionItems
+		offset := i * 4
+		varStr := fmt.Sprintf("$%d, $%d, $%d, $%d)", offset+5, offset+6, offset+7, offset+8)
+		queryStr = queryStr + varStr
+		i++
+		args = append(args, item.SellerID, item.ProductID, item.Qty, item.Price)
+	}
+
+	queryStr += ";\nCOMMIT;"
+	var cartID int64
+	err := q.db.QueryRowContext(ctx, queryStr, args...).Scan(&cartID)
+	if err != nil {
+		return 0, err
+	}
+	return cartID, nil
+}
+
+// func (q *Queries) InsertCartTransaction(ctx context.Context, arg model.StoreCart, items map[int64]model.StoreCartItems) (int64, error) {
+// 	// Start the transaction
+// 	tx, err := q.db.BeginTx(ctx, nil)
+// 	if err != nil {
+// 		return 0, err
+// 	}
+
+// 	// Insert cart and get the inserted id
+// 	var cartID int64
+// 	err = tx.QueryRowContext(ctx, insertCart,
+// 		arg.TotalPrice,
+// 		arg.SenderName,
+// 		arg.SenderContactType,
+// 		arg.SenderContactDetail,
+// 	).Scan(&cartID)
+
+// 	if err != nil {
+// 		tx.Rollback()
+// 		return 0, err
+// 	}
+
+// 	// Insert cart items dynamically
+// 	stmt, err := tx.PrepareContext(ctx, insertCartItem)
+// 	if err != nil {
+// 		tx.Rollback()
+// 		return 0, err
+// 	}
+// 	defer stmt.Close()
+
+// 	for _, item := range items {
+// 		_, err := stmt.ExecContext(ctx, cartID, item.SellerID, item.ProductID, item.Qty, item.Price)
+// 		if err != nil {
+// 			tx.Rollback()
+// 			return 0, err
+// 		}
+// 	}
+
+// 	// Commit transaction
+// 	if err := tx.Commit(); err != nil {
+// 		return 0, err
+// 	}
+
+// 	return cartID, nil
+// }
 
 const selectProductsByCartId = `-- SelectProductsByCartId
 SELECT

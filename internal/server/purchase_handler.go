@@ -89,21 +89,27 @@ func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
 		SenderContactDetail: req.SenderContactDetail,
 	}
 
-	cartIDfromDB, err := s.service.PushCart(ctx, paramsCart)
+	// cartIDfromDB, err := s.service.PushCart(ctx, paramsCart)
+	// if err != nil {
+	// 	log.Println("error storing purchase: %s\n", err.Error())
+	// 	sendErrorResponse(w, http.StatusInternalServerError, "Internal Server Error")
+	// 	return
+	// }
+
+	cartIDfromDB, err := s.service.PushCartAndItems(ctx, paramsCart, seller)
 	if err != nil {
-		log.Println("error storing purchase: %s\n", err.Error())
-		sendErrorResponse(w, http.StatusInternalServerError, "Internal Server Error")
+		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	for sellerID, cartItems := range seller {
-		cartItems.CartID = cartIDfromDB
-		err := s.service.PushCartItem(ctx, cartItems)
-		if err != nil {
-			log.Println("error storing purchase: %s\n", err.Error())
-			sendErrorResponse(w, http.StatusInternalServerError, "Internal Server Error")
-			return
-		}
+		// cartItems.CartID = cartIDfromDB
+		// err := s.service.PushCartItem(ctx, cartItems)
+		// if err != nil {
+		// 	log.Println("error storing purchase: %s\n", err.Error())
+		// 	sendErrorResponse(w, http.StatusInternalServerError, "Internal Server Error")
+		// 	return
+		// }
 		sellerPaymentDetail, err := s.service.GetSellerPaymentDetailBySellerId(ctx, sellerID)
 		if err != nil {
 			log.Printf("invalid seller: %s\n", err.Error())

@@ -42,6 +42,7 @@ type Repository interface {
 	SelectPaymentDetailByUserId(ctx context.Context, userId int64) (repository.SelectPaymentDetailByUserIdRow, error)
 	InsertCart(ctx context.Context, arg repository.InsertCartRow) (int64, error)
 	InsertCartItem(ctx context.Context, arg repository.InsertCartItemRow) (int64, error)
+	InsertCartTransaction(ctx context.Context, arg model.StoreCart, items map[int64]model.StoreCartItems) (int64, error)
 	SelectProductsByCartId(ctx context.Context, cartId int64) ([]repository.SelectProductsByCartIdRow, error) // Note: not good but okay for now
 	CartExists(ctx context.Context, cartId int64) (bool, error)
 }

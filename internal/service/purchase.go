@@ -90,6 +90,16 @@ func (s *Service) PushCartItem(ctx context.Context, cartItem model.StoreCartItem
 	return nil
 }
 
+func (s *Service) PushCartAndItems(ctx context.Context, cart model.StoreCart, items map[int64]model.StoreCartItems) (int64, error) {
+	cartID, err := s.repository.InsertCartTransaction(ctx, cart, items)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return cartID, nil
+}
+
 func (s *Service) PurchasePayment(ctx context.Context, purchaseId string, fileIds []string) error {
 	// Parse purchaseId to get cartId (assuming purchaseId is actually cartId as string)
 	cartId, err := strconv.ParseInt(purchaseId, 10, 64)
