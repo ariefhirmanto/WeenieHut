@@ -2,8 +2,14 @@ name: Build and Push
 
 on:
   push:
-    branches: [main, feat/ci-cd]
-  workflow_dispatch:  # Allow manual trigger
+    branches: [main]
+  workflow_dispatch: 
+    inputs:
+      branch:
+        description: 'Branch to run on'
+        required: true
+        default: 'main'
+        type: string
 env:
   REGISTRY: us-west1-docker.pkg.dev
   TAG: projectsprint-000001/ps-docker-repo/solid-weenie-hut
