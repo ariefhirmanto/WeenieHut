@@ -5,6 +5,7 @@ import (
 	"WeenieHut/internal/model"
 	"WeenieHut/internal/storage"
 	"WeenieHut/internal/utils"
+	"WeenieHut/observability"
 	"context"
 	"fmt"
 	"io"
@@ -16,6 +17,9 @@ import (
 )
 
 func (s *Service) UploadFile(ctx context.Context, file io.Reader, filename string, sizeInBytes int64) (model.File, error) {
+	ctx, span := observability.Tracer.Start(ctx, "service.file_upload")
+	defer span.End()
+
 	var result model.File
 
 	if sizeInBytes > constants.MaxUploadSizeInBytes {

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"WeenieHut/internal/model"
+	"WeenieHut/observability"
 	"context"
 	"database/sql"
 	"errors"
@@ -9,6 +10,9 @@ import (
 )
 
 func (q *Queries) InsertFile(ctx context.Context, data model.File) (res model.File, err error) {
+	ctx, span := observability.Tracer.Start(ctx, "repository.insert_file")
+	defer span.End()
+
 	query := `
 		INSERT INTO files (
 			uri, thumbnail_uri, created_at, updated_at

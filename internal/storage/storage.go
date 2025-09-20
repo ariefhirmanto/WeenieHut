@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"WeenieHut/observability"
 	"context"
 	"fmt"
 	"log"
@@ -57,6 +58,9 @@ func New(
 }
 
 func (s *MinioStorage) UploadFile(ctx context.Context, bucket, localPath, remotePath string) (string, error) {
+	ctx, span := observability.Tracer.Start(ctx, "storage.s3_upload")
+	defer span.End()
+
 	select {
 	case s.semaphore <- struct{}{}:
 		defer func() {
