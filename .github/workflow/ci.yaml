@@ -6,7 +6,7 @@ on:
   workflow_dispatch:  # Allow manual trigger
 env:
   REGISTRY: us-west1-docker.pkg.dev
-  TAG: projectsprint-000001/ps-docker-repo/solid
+  TAG: projectsprint-000001/ps-docker-repo/solid-weenie-hut
   COMMIT_TAG: 
 jobs:
   build-and-push:
