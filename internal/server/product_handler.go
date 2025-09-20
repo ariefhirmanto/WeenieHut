@@ -3,6 +3,7 @@ package server
 import (
 	"WeenieHut/internal/constants"
 	"WeenieHut/internal/model"
+	"WeenieHut/internal/utils"
 	"encoding/json"
 	"errors"
 	"log"
@@ -35,6 +36,12 @@ func (s *Server) postProductHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID, ok := utils.GetUserIDFromCtx(ctx)
+	if !ok {
+		sendErrorResponse(w, http.StatusBadRequest, "Value not found or wrong type")
+	}
+
+	req.UserID = userID
 	res, err := s.service.PostProduct(ctx, model.PostProductRequest(req))
 	if err != nil {
 		log.Println("failed to create product:", err)
@@ -44,7 +51,6 @@ func (s *Server) postProductHandler(w http.ResponseWriter, r *http.Request) {
 			sendErrorResponse(w, http.StatusBadRequest, err.Error())
 		case errors.Is(err, constants.ErrDuplicateSKU):
 			sendErrorResponse(w, http.StatusConflict, err.Error())
-			sendErrorResponse(w, http.StatusUnauthorized, err.Error())
 		default:
 			sendErrorResponse(w, http.StatusInternalServerError, "internal server error")
 		}
@@ -94,9 +100,13 @@ func (s *Server) deleteProductHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := r.URL.Query()
+	productId := r.PathValue("productId")
+	if len(productId) == 0 {
+		sendErrorResponse(w, http.StatusBadRequest, "product id cannot be empty")
+	}
+
 	req := DeleteProductRequest{
-		ProductID: query.Get("productId"),
+		ProductID: productId,
 	}
 
 	err := s.service.DeleteProduct(r.Context(), model.DeleteProductRequest(req))
@@ -106,6 +116,7 @@ func (s *Server) deleteProductHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			sendErrorResponse(w, http.StatusInternalServerError, "internal server error")
 		}
+		log.Printf("failed to delete product: %v", err)
 		return
 	}
 
@@ -124,9 +135,13 @@ func (s *Server) updateProductHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := r.URL.Query()
+	productId := r.PathValue("productId")
+	if len(productId) == 0 {
+		sendErrorResponse(w, http.StatusBadRequest, "product id cannot be empty")
+	}
+
 	req := PutProductRequest{
-		ProductID: query.Get("productId"),
+		ProductID: productId,
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -139,6 +154,7 @@ func (s *Server) updateProductHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	req.ProductID = productId
 	res, err := s.service.UpdateProduct(r.Context(), model.PutProductRequest(req))
 	if err != nil {
 		switch {
@@ -151,6 +167,7 @@ func (s *Server) updateProductHandler(w http.ResponseWriter, r *http.Request) {
 		default:
 			sendErrorResponse(w, http.StatusInternalServerError, "internal server error")
 		}
+		log.Printf("failed to update product: %v", err)
 		return
 	}
 
