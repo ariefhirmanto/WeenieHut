@@ -39,7 +39,7 @@ func testSetup(t *testing.T) *Server {
 	db := database.New()
 	repo := repository.New(db)
 	storage := storage.New("localhost:9000", "team-solid", "@team-solid", storage.Option{MaxConcurrent: 5})
-	imageCompressor := imagecompressor.New(5)
+	imageCompressor := imagecompressor.New(5, 50)
 	svc := service.New(repo, storage, imageCompressor)
 	return &Server{
 		port:      8080,
