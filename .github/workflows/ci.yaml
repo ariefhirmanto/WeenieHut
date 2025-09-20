@@ -2,12 +2,12 @@ name: Build and Push
 
 on:
   push:
-    branch: [main]
+    branches: [main]
   workflow_dispatch:  # Allow manual trigger
 env:
   REGISTRY: us-west1-docker.pkg.dev
   TAG: projectsprint-000001/ps-docker-repo/solid-weenie-hut
-  COMMIT_TAG: 
+  COMMIT_TAG: ""
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
