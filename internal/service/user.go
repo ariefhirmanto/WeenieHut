@@ -7,6 +7,7 @@ import (
 	"WeenieHut/internal/utils"
 	"context"
 	"strings"
+	"sync"
 )
 
 type UpdateUserParams struct {
@@ -102,10 +103,51 @@ func (s *Service) GetUserProfile(ctx context.Context, userId int64) (model.User,
 }
 
 func (s *Service) UpdateUserProfile(ctx context.Context, params UpdateUserParams) (model.User, error) {
-	_, err := s.IsUserExist(ctx, params.UserID)
-	if err != nil {
-		return model.User{}, err
+	type validationResult struct {
+		validationType string
+		err            error
+		fileURI        string
+		thumbnailURI   string
 	}
+
+	var wg sync.WaitGroup
+	resultChan := make(chan validationResult, 2)
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		_, err := s.IsUserExist(ctx, params.UserID)
+		resultChan <- validationResult{
+			validationType: "user",
+			err:            err,
+		}
+	}()
+
+	if params.FileID != 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			file, err := s.repository.GetFileUpload(ctx, params.FileID)
+			if err != nil {
+				resultChan <- validationResult{
+					validationType: "file",
+					err:            constants.ErrFileNotFound,
+				}
+				return
+			}
+			resultChan <- validationResult{
+				validationType: "file",
+				err:            nil,
+				fileURI:        file.Uri,
+				thumbnailURI:   file.ThumbnailUri,
+			}
+		}()
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
 
 	repoParams := repository.UpdateUserProfileParams{
 		UserID:            params.UserID,
@@ -115,14 +157,14 @@ func (s *Service) UpdateUserProfile(ctx context.Context, params UpdateUserParams
 		BankAccountNumber: params.BankAccountNumber,
 	}
 
-	if params.FileID != 0 {
-		file, err := s.repository.GetFileUpload(ctx, params.FileID)
-		if err != nil {
-			return model.User{}, constants.ErrFileNotFound
+	for result := range resultChan {
+		if result.err != nil {
+			return model.User{}, result.err
 		}
-
-		repoParams.FileThumbnailURI = file.ThumbnailUri
-		repoParams.FileURI = file.Uri
+		if result.validationType == "file" {
+			repoParams.FileThumbnailURI = result.thumbnailURI
+			repoParams.FileURI = result.fileURI
+		}
 	}
 
 	user, err := s.repository.UpdateUserProfile(ctx, repoParams)
@@ -144,23 +186,57 @@ func (s *Service) UpdateUserContact(ctx context.Context, params UpdateUserParams
 		return model.User{}, err
 	}
 
+	type validationResult struct {
+		fieldType string
+		exists    bool
+		err       error
+	}
+
+	var wg sync.WaitGroup
+	resultChan := make(chan validationResult, 2)
+
 	if params.Email != "" {
-		emailExists, err := s.repository.IsEmailExist(ctx, params.Email, userID)
-		if err != nil {
-			return model.User{}, constants.ErrInternalServer
-		}
-		if emailExists {
-			return model.User{}, constants.ErrDuplicateEmail
-		}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			emailExists, err := s.repository.IsEmailExist(ctx, params.Email, userID)
+			resultChan <- validationResult{
+				fieldType: "email",
+				exists:    emailExists,
+				err:       err,
+			}
+		}()
 	}
 
 	if params.Phone != "" {
-		phoneExists, err := s.repository.IsPhoneExist(ctx, params.Phone, userID)
-		if err != nil {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			phoneExists, err := s.repository.IsPhoneExist(ctx, params.Phone, userID)
+			resultChan <- validationResult{
+				fieldType: "phone",
+				exists:    phoneExists,
+				err:       err,
+			}
+		}()
+	}
+
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	for result := range resultChan {
+		if result.err != nil {
 			return model.User{}, constants.ErrInternalServer
 		}
-		if phoneExists {
-			return model.User{}, constants.ErrDuplicatePhoneNum
+		if result.exists {
+			if result.fieldType == "email" {
+				return model.User{}, constants.ErrDuplicateEmail
+			}
+			if result.fieldType == "phone" {
+				return model.User{}, constants.ErrDuplicatePhoneNum
+			}
 		}
 	}
 
