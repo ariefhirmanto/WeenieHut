@@ -4,7 +4,6 @@ import (
 	"WeenieHut/internal/constants"
 	"WeenieHut/internal/model"
 	"WeenieHut/internal/utils"
-	"errors"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
@@ -21,6 +20,38 @@ func NewUserValidator(v *validator.Validate) *UserValidator {
 }
 
 func (uv *UserValidator) ValidateUpdateProfileRequest(req UpdateUserProfileRequest) error {
+	if (req == UpdateUserProfileRequest{}) {
+		return constants.ErrInvalidRequest
+	}
+
+	if req.Email != "" {
+		return constants.ErrInvalidRequest
+	}
+
+	if req.Phone != "" {
+		return constants.ErrInvalidRequest
+	}
+
+	if req.Name != "" {
+		return constants.ErrInvalidRequest
+	}
+
+	if req.FileURI != "" {
+		return constants.ErrInvalidRequest
+	}
+
+	if req.FileThumbnailURI != "" {
+		return constants.ErrInvalidRequest
+	}
+
+	if req.FileID == "" {
+		return constants.ErrInvalidRequest
+	}
+
+	if _, err := strconv.ParseInt(req.FileID, 10, 64); err != nil {
+		return constants.ErrInvalidFileID
+	}
+
 	return uv.validator.Struct(req)
 }
 
@@ -30,19 +61,19 @@ func (uv *UserValidator) ValidateUpdateContactRequest(req UpdateUserContactReque
 
 	// exactly one field must be provided
 	if !emailProvided && !phoneProvided {
-		return errors.New("either email or phone must be provided")
+		return constants.ErrEmailOrPhoneMustBeProvided
 	}
 
 	if emailProvided && phoneProvided {
-		return errors.New("cannot update both email and phone simultaneously")
+		return constants.ErrCannotUpdateEmailAndPhone
 	}
 
 	if emailProvided && !utils.IsEmail(req.Email) {
-		return errors.New("invalid email format")
+		return constants.ErrInvalidEmailFormat
 	}
 
 	if phoneProvided && !utils.IsValidPhoneNumber(req.Phone) {
-		return errors.New("invalid phone number format")
+		return constants.ErrInvalidPhoneNumberFormat
 	}
 
 	return uv.validator.Struct(req)
@@ -62,20 +93,22 @@ func NewUserResponseBuilder() *UserResponseBuilder {
 }
 
 func (urb *UserResponseBuilder) BuildUserResponse(user model.User) (UserResponse, error) {
-	fileIdResp := int(user.FileID)
-	if int64(fileIdResp) != user.FileID {
-		return UserResponse{}, constants.ErrInternalServer
+	var fileIDStr string
+	if user.FileID.Valid {
+		fileIDStr = strconv.FormatInt(user.FileID.Int64, 10)
+	} else {
+		fileIDStr = ""
 	}
 
 	return UserResponse{
 		Email:             utils.ToString(user.Email),
 		Phone:             utils.ToString(user.Phone),
-		Name:              user.Name,
-		FileID:            strconv.Itoa(fileIdResp),
-		FileURI:           user.FileURI,
-		FileThumbnailURI:  user.FileThumbnailURI,
-		BankAccountName:   user.BankAccountName,
-		BankAccountHolder: user.BankAccountHolder,
-		BankAccountNumber: user.BankAccountNumber,
+		Name:              utils.ToString(user.Name),
+		FileID:            fileIDStr,
+		FileURI:           utils.ToString(user.FileURI),
+		FileThumbnailURI:  utils.ToString(user.FileThumbnailURI),
+		BankAccountName:   utils.ToString(user.BankAccountName),
+		BankAccountHolder: utils.ToString(user.BankAccountHolder),
+		BankAccountNumber: utils.ToString(user.BankAccountNumber),
 	}, nil
 }

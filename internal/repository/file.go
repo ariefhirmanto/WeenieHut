@@ -36,7 +36,7 @@ func (q *Queries) InsertFile(ctx context.Context, data model.File) (res model.Fi
 
 func (q *Queries) GetFileUpload(ctx context.Context, id int64) (model.File, error) {
 	query := `
-		SELECT id, uri, thumbnail_uri, size_in_bytes, created_at, updated_at FROM files
+		SELECT id, uri, thumbnail_uri, created_at, updated_at FROM files
 		WHERE id = $1
 	`
 
@@ -46,7 +46,6 @@ func (q *Queries) GetFileUpload(ctx context.Context, id int64) (model.File, erro
 		&f.ID,
 		&f.Uri,
 		&f.ThumbnailUri,
-		&f.SizeInBytes,
 		&f.CreatedAt,
 		&f.UpdatedAt,
 	); err != nil {
