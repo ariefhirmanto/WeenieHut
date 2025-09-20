@@ -29,16 +29,18 @@ RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/
 RUN groupadd --gid 1001 appgroup && \
     useradd --uid 1001 --gid appgroup --shell /bin/bash --create-home appuser
 
-WORKDIR /root/
+# Create app directory
+RUN mkdir -p /app && chown appuser:appgroup /app
 
 # Copy the binary from builder stage
-COPY --from=builder /app/main .
+COPY --from=builder /app/main /app/main
 
-# Change ownership to non-root user
-RUN chown appuser:appgroup main
+# Set execute permissions
+RUN chmod +x /app/main
 
-# Switch to non-root user
+# Switch to non-root user and set working directory
 USER appuser
+WORKDIR /app
 
 # Expose port
 EXPOSE 8080
