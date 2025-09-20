@@ -41,6 +41,11 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 
 func (s *Server) contentMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		if path == "/v1/file" {
+			next.ServeHTTP(w, r)
+			return
+		}
 
 		if r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodPatch {
 			ct := r.Header.Get("Content-Type")
