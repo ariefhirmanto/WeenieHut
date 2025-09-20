@@ -1,6 +1,7 @@
 package imagecompressor
 
 import (
+	"WeenieHut/observability"
 	"bytes"
 	"context"
 	"fmt"
@@ -67,6 +68,9 @@ func (cmp *ImageCompressor) thumbnail(ctx context.Context, img image.Image, size
 }
 
 func (cmp *ImageCompressor) Compress(ctx context.Context, src string) (string, error) {
+	ctx, span := observability.Tracer.Start(ctx, "image_compress")
+	defer span.End()
+
 	select {
 	case cmp.semaphore <- struct{}{}:
 		defer func() { <-cmp.semaphore }()

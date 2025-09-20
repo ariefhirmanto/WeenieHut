@@ -76,4 +76,20 @@ db-migrate-down:
 db-generate-sql:
 	@sqlc generate
 
+deploy-local:
+	@if docker compose --profile deploy up --build 2>/dev/null; then \
+		: ; \
+	else \
+		echo "Falling back to Docker Compose V1"; \
+		docker-compose --profile deploy up --build; \
+	fi
+
+test-file:
+	@hey -n 1 -c 1 -q 1 -m POST \
+	-H "Content-Type: multipart/form-data; boundary=db7c097185310d799ace6ee193ebad21" -T "multipart/form-data" \
+	-D './internal/server/testdata/image-50KB.jpg' 'http://localhost:8080/v1/file'
+
+load-test-file:
+	@hey -z 5s -c 100 -m POST -D './internal/server/testdata/image-50KB.jpg' 'http://localhost:8080/v1/file'
+
 .PHONY: all build run test clean watch lint docker-run docker-down itest db-migrate-create db-migrate-up db-migrate-down db-generate-sql

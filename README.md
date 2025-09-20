@@ -109,3 +109,8 @@ Create your .env file and use the .env.sample file as reference
 ## Create SQL query
 
 Write your query in db/sql/query directory and run `make db-generate-sql`
+
+## Run WeenieHut API locally with docker compose 
+```
+make deploy-local
+```
