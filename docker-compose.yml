@@ -1,5 +1,6 @@
 services:
   weenie-hut-api:
+    image: weeniehut-weenie-hut-api:latest
     profiles:
       - deploy
     build:
@@ -13,15 +14,19 @@ services:
       - psql_bp
       - minio
     environment:
+      - PORT=8080
+      - APP_ENV=local
       - DB_HOST=psql_bp
       - DB_PORT=5432
-      - DB_USER=postgres
+      - DB_USERNAME=postgres
       - DB_PASSWORD=postgres
-      - DB_NAME=weenie-hut-dev
-      - MINIO_ENDPOINT=minio:9000
-      - MINIO_ACCESS_KEY=team-solid
-      - MINIO_SECRET_KEY=@team-solid
-      - MINIO_BUCKET_NAME=images
+      - DB_DATABASE=weenie-hut-dev
+      - DB_SCHEMA=public
+      - S3_ENDPOINT=minio:9000
+      - S3_ACCESS_KEY_ID=team-solid
+      - S3_SECRET_ACCESS_KEY=@team-solid
+      - S3_BUCKET=images
+      - OTLP_ENDPOINT=jaeger:4317
   
   psql_bp:
     image: postgres:latest
