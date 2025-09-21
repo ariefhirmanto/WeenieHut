@@ -79,7 +79,7 @@ type PurchaseCartRequest struct {
 
 type PurchasedItem struct {
 	ProductID string `json:"productId" validate:"required"`
-	Qty       int    `json:"qty" validate:"required,min=2"`
+	Qty       int    `json:"qty" validate:"required,min=1"`
 }
 
 type PurchasePaymentRequest struct {
