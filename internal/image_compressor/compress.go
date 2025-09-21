@@ -91,13 +91,7 @@ func (cmp *ImageCompressor) Compress(ctx context.Context, src string) (string, e
 		return "", fmt.Errorf("compression queue timeout")
 	}
 
-	file, err := os.Open(src)
-	if err != nil {
-		return "", fmt.Errorf("error opening file: %w", err)
-	}
-	defer file.Close() // Ensure the file is closed
-
-	img, format, err := image.Decode(file)
+	img, format, err := cmp.loadImage(ctx, src)
 	if err != nil {
 		return "", fmt.Errorf("error decoding file: %w", err)
 	}
@@ -132,4 +126,17 @@ func (cmp *ImageCompressor) Compress(ctx context.Context, src string) (string, e
 		return "", fmt.Errorf("error writing data: %w", err)
 	}
 	return resultFilename, nil
+}
+
+func (cmp *ImageCompressor) loadImage(ctx context.Context, src string) (image.Image, string, error) {
+	_, span := observability.Tracer.Start(ctx, "image_compressor.load_image")
+	defer span.End()
+
+	file, err := os.Open(src)
+	if err != nil {
+		return nil, "", fmt.Errorf("error opening file: %w", err)
+	}
+	defer file.Close() // Ensure the file is closed
+
+	return image.Decode(file)
 }
