@@ -7,6 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"strconv"
 )
 
@@ -18,6 +19,7 @@ func (s *Service) PostProduct(ctx context.Context, req model.PostProductRequest)
 	if req.FileID != "" {
 		file, err := s.repository.GetFileByFileID(ctx, req.FileID)
 		if err != nil {
+			log.Printf("failed to get file by id: %v", err)
 			if errors.Is(err, sql.ErrNoRows) {
 				return res, constants.ErrFileIDNotValid
 			}
@@ -30,7 +32,12 @@ func (s *Service) PostProduct(ctx context.Context, req model.PostProductRequest)
 	//
 	// Set Product Value
 	//
+	if err != nil {
+		return model.PostProductResponse{}, err
+	}
+
 	newProduct := model.Product{
+		UserID:           req.UserID,
 		Name:             req.Name,
 		Category:         utils.ToPointer(req.Category),
 		Qty:              req.Qty,
@@ -137,7 +144,7 @@ func (s *Service) DeleteProduct(ctx context.Context, req model.DeleteProductRequ
 	if req.ProductID != "" {
 		productIDInt, err = strconv.Atoi(req.ProductID)
 		if err != nil {
-			return err
+			return constants.ErrProductNotFound
 		}
 	}
 
@@ -176,7 +183,7 @@ func (s *Service) UpdateProduct(ctx context.Context, req model.PutProductRequest
 	if req.ProductID != "" {
 		productIDInt, err = strconv.Atoi(req.ProductID)
 		if err != nil {
-			return res, err
+			return res, constants.ErrProductNotFound
 		}
 	}
 
