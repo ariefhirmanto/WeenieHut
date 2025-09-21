@@ -97,6 +97,56 @@ services:
       - "--collector.otlp.http.host-port"
       - ":4318"
     restart: always
+
+  prometheus:
+    image: prom/prometheus:latest
+    profiles: 
+      - monitoring
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+  grafana:
+    image: grafana/grafana:latest
+    profiles:
+      - monitoring
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/provisioning/dashboards/postgres-dashboard.json:/etc/grafana/provisioning/dashboards/postgres-dashboard.json
+    depends_on:
+      - prometheus
+  
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter
+    profiles:
+      - monitoring
+    container_name: postgres-exporter
+    ports:
+      - "9187:9187"
+    environment:
+      # Replace with your K8s PostgreSQL connection details
+      - DATA_SOURCE_NAME=postgresql://postgres:postgres@psql_bp:5432/weenie-hut-dev?sslmode=disable
+    depends_on:
+      - prometheus
+
 volumes:
   psql_volume_bp:
   minio_volume:
+  prometheus_data:
+  grafana_data:

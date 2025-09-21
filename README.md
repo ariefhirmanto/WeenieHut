@@ -114,3 +114,19 @@ Write your query in db/sql/query directory and run `make db-generate-sql`
 ```
 make deploy-local
 ```
+
+## Setup Database Monitoring uisng Docker Compose
+- Monitor database performance using these following tools:
+  - Prometheus
+  - Prometheus Exporter
+  - Grafana
+
+  Prometheus exproter will hit database endpoint to get the resource metrics and these data will be scraped by Prometheus. Grafana then serves the visualization to us!
+- Command:
+  ```bash
+  docker-compose --profile monitoring up -d
+  ```
+  * It will also run other services like PostrgeSQL database and MinIO
+
+- Open Grafana locally -> `http://localhost:3000`
+  | setup Your own credentials (default-> username: admin | password: admin)
