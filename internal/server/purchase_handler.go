@@ -12,7 +12,6 @@ import (
 )
 
 func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("purchase cart")
 	ctx := r.Context()
 	var req PurchaseCartRequest
 
