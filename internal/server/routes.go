@@ -25,5 +25,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("PUT /v1/product/{productId}", s.updateProductHandler)
 	mux.HandleFunc("DELETE /v1/product/{productId}", s.deleteProductHandler)
 
+	mux.HandleFunc("POST /v1/purchase", s.purchaseCartHandler)
+	mux.HandleFunc("POST /v1/purchase/{purchaseId}", s.purchasePaymentHandler)
 	return s.contentMiddleware(s.authMiddleware(mux))
 }

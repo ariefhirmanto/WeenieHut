@@ -69,3 +69,19 @@ type PutProductRequest struct {
 type DeleteProductRequest struct {
 	ProductID string `query:"productId"`
 }
+
+type PurchaseCartRequest struct {
+	PurchasedItems      []PurchasedItem `json:"purchasedItems" validate:"required,min=1,dive"`
+	SenderName          string          `json:"senderName" validate:"required,min=4,max=55"`
+	SenderContactType   string          `json:"senderContactType" validate:"required,oneof=email phone"`
+	SenderContactDetail string          `json:"senderContactDetail" validate:"required"`
+}
+
+type PurchasedItem struct {
+	ProductID string `json:"productId" validate:"required"`
+	Qty       int    `json:"qty" validate:"required,min=2"`
+}
+
+type PurchasePaymentRequest struct {
+	FileIDs []string `json:"fileIds" validate:"required"`
+}
