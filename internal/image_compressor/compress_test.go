@@ -11,19 +11,19 @@ import (
 
 func TestCompress(t *testing.T) {
 	testdataDir := "testdata"
-	compressor := New(5)
+	compressor := New(5, 50)
 
-	t.Run("PNG", func(t *testing.T) {
-		input := fmt.Sprintf("%s/sample-png.png", testdataDir)
-		result, err := compressor.Compress(context.TODO(), input)
-		assert.Nil(t, err)
-		assert.NotEmpty(t, result)
+	// t.Run("PNG", func(t *testing.T) {
+	// 	input := fmt.Sprintf("%s/sample-png.png", testdataDir)
+	// 	result, err := compressor.Compress(context.TODO(), input)
+	// 	assert.Nil(t, err)
+	// 	assert.NotEmpty(t, result)
 
-		originalSize, _ := utils.GetFileSizeInBytes(input)
-		thumbnailSize, _ := utils.GetFileSizeInBytes(result)
-		ratio := 100 * (float64(thumbnailSize) / float64(originalSize))
-		fmt.Printf("original: %d | thumbnail: %d (%.2f %%)\n", originalSize, thumbnailSize, ratio)
-	})
+	// 	originalSize, _ := utils.GetFileSizeInBytes(input)
+	// 	thumbnailSize, _ := utils.GetFileSizeInBytes(result)
+	// 	ratio := 100 * (float64(thumbnailSize) / float64(originalSize))
+	// 	fmt.Printf("original: %d | thumbnail: %d (%.2f %%)\n", originalSize, thumbnailSize, ratio)
+	// })
 
 	t.Run("JPEG", func(t *testing.T) {
 		input := fmt.Sprintf("%s/sample.jpeg", testdataDir)

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"WeenieHut/internal/model"
+	"WeenieHut/observability"
 	"context"
 	"database/sql"
 	"errors"
@@ -9,6 +10,9 @@ import (
 )
 
 func (q *Queries) InsertFile(ctx context.Context, data model.File) (res model.File, err error) {
+	ctx, span := observability.Tracer.Start(ctx, "repository.insert_file")
+	defer span.End()
+
 	query := `
 		INSERT INTO files (
 			uri, thumbnail_uri, created_at, updated_at
@@ -32,7 +36,7 @@ func (q *Queries) InsertFile(ctx context.Context, data model.File) (res model.Fi
 
 func (q *Queries) GetFileUpload(ctx context.Context, id int64) (model.File, error) {
 	query := `
-		SELECT id, uri, thumbnail_uri, size_in_bytes, created_at, updated_at FROM files
+		SELECT id, uri, thumbnail_uri, created_at, updated_at FROM files
 		WHERE id = $1
 	`
 
@@ -42,7 +46,6 @@ func (q *Queries) GetFileUpload(ctx context.Context, id int64) (model.File, erro
 		&f.ID,
 		&f.Uri,
 		&f.ThumbnailUri,
-		&f.SizeInBytes,
 		&f.CreatedAt,
 		&f.UpdatedAt,
 	); err != nil {
@@ -74,8 +77,8 @@ func (q *Queries) FileExists(ctx context.Context, fileID string) (bool, error) {
 }
 
 func (q *Queries) GetFileByFileID(ctx context.Context, fileID string) (res model.File, err error) {
-	query := `SELECT * FROM files WHERE id = $1`
-	err = q.db.QueryRowContext(ctx, query, fileID).Scan(&res.ID, &res.Uri, &res.ThumbnailUri, &res.SizeInBytes, &res.CreatedAt, &res.UpdatedAt)
+	query := `SELECT id, uri, thumbnail_uri, created_at, updated_at FROM files WHERE id = $1`
+	err = q.db.QueryRowContext(ctx, query, fileID).Scan(&res.ID, &res.Uri, &res.ThumbnailUri, &res.CreatedAt, &res.UpdatedAt)
 	if err != nil {
 		return model.File{}, err
 	}

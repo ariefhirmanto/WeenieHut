@@ -6,6 +6,7 @@ import (
 	"WeenieHut/internal/repository"
 	"WeenieHut/internal/service"
 	"WeenieHut/internal/storage"
+	"WeenieHut/observability"
 	"context"
 	"fmt"
 	"log"
@@ -46,11 +47,12 @@ func main() {
 	db := database.New()
 	defer db.Close()
 	repo := repository.New(db)
-	storage := storage.New(storage.S3Endpoint, storage.S3AccessKeyID, storage.S3SecretAccessKey, storage.Option{MaxConcurrent: 5})
-	imageCompressor := imagecompressor.New(5)
+	storage := storage.New(storage.S3Endpoint, storage.S3AccessKeyID, storage.S3SecretAccessKey, storage.Option{MaxConcurrent: 25})
+	imageCompressor := imagecompressor.New(imagecompressor.MaxConcurrentCompress, imagecompressor.CompressionQuality)
 	svc := service.New(repo, storage, imageCompressor)
 	serv := server.NewServer(svc)
 
+	observability.SetupTracer(context.Background(), observability.OtlpEndpoint)
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
 

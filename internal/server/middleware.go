@@ -9,11 +9,19 @@ import (
 )
 
 func (s *Server) authMiddleware(next http.Handler) http.Handler {
+	publicPaths := map[string]bool{
+		"/health":            true,
+		"/v1/login/email":    true,
+		"/v1/login/phone":    true,
+		"/v1/register/email": true,
+		"/v1/register/phone": true,
+		"/v1/file":           true,
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
-		if path == "/health" || path == "/v1/login/email" || path == "/v1/login/phone" ||
-			path == "/v1/register/email" || path == "/v1/register/phone" ||
-			(path == "/v1/product" && r.Method == "GET") {
+
+		if publicPaths[path] || (path == "/v1/product" && r.Method == "GET") {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -41,6 +49,11 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 
 func (s *Server) contentMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		if path == "/v1/file" {
+			next.ServeHTTP(w, r)
+			return
+		}
 
 		if r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodPatch {
 			ct := r.Header.Get("Content-Type")

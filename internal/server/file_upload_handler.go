@@ -2,6 +2,7 @@ package server
 
 import (
 	"WeenieHut/internal/constants"
+	"WeenieHut/observability"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,19 +10,23 @@ import (
 )
 
 func (s *Server) fileUploadHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	ctx, span := observability.Tracer.Start(r.Context(), "handler.file_upload")
+	defer span.End()
+
 	if r.Method != "POST" {
 		sendErrorResponse(w, http.StatusBadRequest, "Method not allowed")
 		return
 	}
 
-	if err := r.ParseMultipartForm(100 << 10); err != nil { // 100 KB
+	if err := r.ParseMultipartForm(150 << 10); err != nil { // 150 KB
+		log.Printf("error parsing multipart form: %v", err)
 		sendErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("error parsing multipart form: %v", err))
 		return
 	}
 
 	file, header, err := r.FormFile("file")
 	if err != nil {
+		log.Printf("invalid request: %v", err)
 		sendErrorResponse(w, http.StatusBadRequest, "invalid request")
 		return
 	}
