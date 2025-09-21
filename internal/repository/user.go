@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strconv"
 )
 
 const (
@@ -83,7 +84,7 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, params UpdateUserProfil
 	if params.FileID == 0 {
 		fileID = nil
 	} else {
-		fileID = params.FileID
+		fileID = strconv.Itoa(int(params.FileID))
 	}
 
 	if params.FileURI == "" {
@@ -166,7 +167,6 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, params UpdateUserProfil
 
 func (q *Queries) GetUserProfile(ctx context.Context, id int64) (model.User, error) {
 	query := selectUserById
-
 	row := q.db.QueryRowContext(ctx, query, id)
 	var u model.User
 	if err := row.Scan(
