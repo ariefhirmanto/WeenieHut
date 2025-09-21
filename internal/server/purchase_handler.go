@@ -17,14 +17,14 @@ func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		log.Printf("invalid payload: %s\n", err.Error())
+		log.Printf("(%d invalid payload: %s\n", http.StatusBadRequest, err.Error())
 		sendErrorResponse(w, http.StatusBadRequest, "invalid request")
 		return
 	}
 
 	err = s.validator.Struct(req)
 	if err != nil {
-		log.Printf("invalid validator: %s\n", err.Error())
+		log.Printf("(%d invalid validator: %s\n", http.StatusBadRequest, err.Error())
 		sendErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -32,31 +32,31 @@ func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
 	seller := make(map[int64]model.StoreCartItems)
 	var products []model.ProductCart
 	var paymentdetails []model.CartPaymentDetail
-	var totalPrices int64
+	var totalPrices float64
 	for _, item := range req.PurchasedItems {
 		now := time.Now()
 		productIDInt, err := strconv.ParseInt(item.ProductID, 10, 64)
 		if err != nil {
-			log.Printf("invalid productID: %s\n", err.Error())
+			log.Printf("(%d invalid product id: %s\n", http.StatusBadRequest, err.Error())
 			sendErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		productInCart, sellerID, err := s.service.GetProductByProductId(ctx, productIDInt)
 		if err != nil {
-			log.Println("error get product: %s\n", err.Error())
+			log.Printf("%d error get product: %s\n", http.StatusInternalServerError, err.Error())
 			sendErrorResponse(w, http.StatusInternalServerError, "Internal Server Error")
 			return
 		}
 
 		if item.Qty <= 0 {
-			log.Printf("product qty is out")
-			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+			log.Printf("%d product qty is out", http.StatusBadRequest)
+			sendErrorResponse(w, http.StatusBadRequest, "product qty is out")
 			return
 		}
 		if productInCart.Qty < item.Qty {
-			log.Printf("bought more than the available qty")
-			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+			log.Printf("%d bought more than the available qty", http.StatusBadRequest)
+			sendErrorResponse(w, http.StatusBadRequest, "bought more than the available qty")
 			return
 		}
 
@@ -98,6 +98,7 @@ func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
 
 	cartIDfromDB, err := s.service.PushCartAndItems(ctx, paramsCart, seller)
 	if err != nil {
+		log.Printf("(%d error getting cart from db: %s\n", http.StatusInternalServerError, err.Error())
 		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -112,7 +113,7 @@ func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
 		// }
 		sellerPaymentDetail, err := s.service.GetSellerPaymentDetailBySellerId(ctx, sellerID)
 		if err != nil {
-			log.Printf("invalid seller: %s\n", err.Error())
+			log.Printf("%d invalid seller: %s\n", http.StatusBadRequest, err.Error())
 			sendErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -155,7 +156,7 @@ func (s *Server) purchasePaymentHandler(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		switch err {
 		case constants.ErrPurchaseNotFound:
-			sendErrorResponse(w, http.StatusBadRequest, err.Error())
+			sendErrorResponse(w, http.StatusNotFound, err.Error())
 		case constants.ErrFileNotFound:
 			sendErrorResponse(w, http.StatusBadRequest, err.Error())
 		case constants.ErrNotEqualAvailableSellersInCart:
@@ -169,7 +170,7 @@ func (s *Server) purchasePaymentHandler(w http.ResponseWriter, r *http.Request) 
 	sendResponse(w, http.StatusCreated, nil)
 }
 
-func formatOutput(products []model.ProductCart, paymentdetails []model.CartPaymentDetail, purchaseID int64, totalP int64) PurchaseResponse {
+func formatOutput(products []model.ProductCart, paymentdetails []model.CartPaymentDetail, purchaseID int64, totalP float64) PurchaseResponse {
 	var purchasedItemR []PurchasedItemResponse
 	var paymentDetailR []PaymentDetailResponse
 	for _, product := range products {

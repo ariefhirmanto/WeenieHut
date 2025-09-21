@@ -16,12 +16,13 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 		"/v1/register/email": true,
 		"/v1/register/phone": true,
 		"/v1/file":           true,
+		"/v1/purchase":       true,
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 
-		if publicPaths[path] || (path == "/v1/product" && r.Method == "GET") {
+		if publicPaths[path] || (path == "/v1/product" && r.Method == "GET") || strings.HasPrefix(path, "/v1/purchase") {
 			next.ServeHTTP(w, r)
 			return
 		}

@@ -104,7 +104,7 @@ func (s *Service) PurchasePayment(ctx context.Context, purchaseId string, fileId
 	// Parse purchaseId to get cartId (assuming purchaseId is actually cartId as string)
 	cartId, err := strconv.ParseInt(purchaseId, 10, 64)
 	if err != nil {
-		return constants.ErrInternalServer
+		return constants.ErrPurchaseNotFound
 	}
 
 	// Get Cart
