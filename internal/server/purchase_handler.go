@@ -12,6 +12,7 @@ import (
 )
 
 func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("purchase cart")
 	ctx := r.Context()
 	var req PurchaseCartRequest
 
@@ -121,7 +122,7 @@ func (s *Server) purchaseCartHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := formatOutput(products, paymentdetails, cartIDfromDB, totalPrices)
-	sendResponse(w, http.StatusOK, resp)
+	sendResponse(w, http.StatusCreated, resp)
 }
 
 func (s *Server) purchasePaymentHandler(w http.ResponseWriter, r *http.Request) {
@@ -166,7 +167,7 @@ func (s *Server) purchasePaymentHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	sendResponse(w, http.StatusAccepted, nil)
+	sendResponse(w, http.StatusCreated, nil)
 }
 
 func formatOutput(products []model.ProductCart, paymentdetails []model.CartPaymentDetail, purchaseID int64, totalP int64) PurchaseResponse {
