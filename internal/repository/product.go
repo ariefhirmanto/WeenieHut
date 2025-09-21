@@ -8,22 +8,23 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (res model.Product, err error) {
 	query := `
 		INSERT INTO product (
-			name, category, qty, price, sku, file_id, file_uri, file_thumbnail_uri, created_at, updated_at
+			user_id, name, category, qty, price, sku, file_id, file_uri, file_thumbnail_uri, created_at, updated_at
 		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW()
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW()
 		)
 		RETURNING id, created_at, updated_at
 	`
-	fmt.Println("Executing Query:", query, "with data:", data)
+	// fmt.Println("Executing Query:", query, "with data:", data)
 	inserted := data
 
 	err = q.db.QueryRowContext(ctx, query,
+		data.UserID,
 		data.Name,
 		data.Category,
 		data.Qty,
@@ -35,8 +36,15 @@ func (q *Queries) InsertProduct(ctx context.Context, data model.Product) (res mo
 	).Scan(&inserted.ID, &inserted.CreatedAt, &inserted.UpdatedAt)
 
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
-			return model.Product{}, constants.ErrDuplicateSKU
+		var pgErr *pgconn.PgError
+
+		if errors.As(err, &pgErr) {
+			fmt.Println("Severity Code: ", pgErr.Code)
+			if pgErr.Code == "23505" {
+				return model.Product{}, constants.ErrDuplicateSKU
+			}
+		} else {
+			fmt.Println("Severity not ok")
 		}
 		return model.Product{}, fmt.Errorf("insert product: %w", err)
 	}
@@ -107,7 +115,7 @@ func (q *Queries) GetProducts(ctx context.Context, filter model.ProductFilter) (
 	query += fmt.Sprintf(" LIMIT %d OFFSET %d", limit, offset)
 
 	// debug log
-	fmt.Println("Executing Query:", query, "Args:", args)
+	// fmt.Println("Executing Query:", query, "Args:", args)
 
 	rows, err := q.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -177,8 +185,8 @@ func (q *Queries) UpdateProduct(ctx context.Context, data model.Product) (res mo
 		&updated.UpdatedAt,
 	)
 	if err != nil {
-		var pqErr *pq.Error
-		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
 			return model.Product{}, constants.ErrDuplicateSKU
 		}
 		return model.Product{}, fmt.Errorf("update product: %w", err)

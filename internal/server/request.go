@@ -34,6 +34,7 @@ type UpdateUserContactRequest struct {
 
 type PostProductRequest struct {
 	Name     string  `json:"name" validate:"required,min=4,max=32"`
+	UserID   int64   `json:"user_id"`
 	Category string  `json:"category" validate:"required,productType"`
 	Qty      int     `json:"qty" validate:"required,min=1"`
 	Price    float64 `json:"price" validate:"required,gte=100"`
