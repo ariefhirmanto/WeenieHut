@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 )
 
@@ -36,7 +35,7 @@ type SelectProductByProductIdRow struct {
 	Name             string
 	Category         *string
 	Qty              int
-	Price            int64
+	Price            float64
 	SKU              string
 	FileID           *string
 	FileURI          *string
@@ -96,7 +95,7 @@ INSERT INTO carts (
 RETURNING id`
 
 type InsertCartRow struct {
-	TotalPrice          int64
+	TotalPrice          float64
 	SenderName          string
 	SenderContactType   string
 	SenderContactDetail string
@@ -127,7 +126,7 @@ type InsertCartItemRow struct {
 	SellerID  int64
 	ProductID int64
 	Qty       int
-	Price     int64
+	Price     float64
 }
 
 func (q *Queries) InsertCartItem(ctx context.Context, arg InsertCartItemRow) (int64, error) {
@@ -142,103 +141,50 @@ func (q *Queries) InsertCartItem(ctx context.Context, arg InsertCartItemRow) (in
 	return id, err
 }
 
-const transactionCarts = `-- Insert into carts and return the id
-BEGIN;
-
-WITH inserted_cart AS (
-    INSERT INTO carts (
-        total_price,
-        sender_name,
-        sender_contact_type,
-        sender_contact_detail
-    ) VALUES ($1, $2, $3, $4)
-    RETURNING id
-)`
-
-const transactionItems = `
-INSERT INTO cart_items (
-    cart_id,
-    seller_id,
-    product_id,
-    qty,
-    price
-)
-VALUES ((SELECT id FROM inserted_cart), 
-`
-
 func (q *Queries) InsertCartTransaction(ctx context.Context, arg model.StoreCart, items map[int64]model.StoreCartItems) (int64, error) {
-	i := 0
-	queryStr := transactionCarts
+	// Start the transaction
+	tx, err := q.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
 
-	args := []interface{}{
+	// Insert cart and get the inserted id
+	var cartID int64
+	err = tx.QueryRowContext(ctx, insertCart,
 		arg.TotalPrice,
 		arg.SenderName,
 		arg.SenderContactType,
 		arg.SenderContactDetail,
-	}
+	).Scan(&cartID)
 
-	for _, item := range items {
-		queryStr = queryStr + transactionItems
-		offset := i * 4
-		varStr := fmt.Sprintf("$%d, $%d, $%d, $%d)", offset+5, offset+6, offset+7, offset+8)
-		queryStr = queryStr + varStr
-		i++
-		args = append(args, item.SellerID, item.ProductID, item.Qty, item.Price)
-	}
-
-	queryStr += ";\nCOMMIT;"
-	var cartID int64
-	err := q.db.QueryRowContext(ctx, queryStr, args...).Scan(&cartID)
 	if err != nil {
+		tx.Rollback()
 		return 0, err
 	}
+
+	// Insert cart items dynamically
+	stmt, err := tx.PrepareContext(ctx, insertCartItem)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+	defer stmt.Close()
+
+	for _, item := range items {
+		_, err := stmt.ExecContext(ctx, cartID, item.SellerID, item.ProductID, item.Qty, item.Price)
+		if err != nil {
+			tx.Rollback()
+			return 0, err
+		}
+	}
+
+	// Commit transaction
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+
 	return cartID, nil
 }
-
-// func (q *Queries) InsertCartTransaction(ctx context.Context, arg model.StoreCart, items map[int64]model.StoreCartItems) (int64, error) {
-// 	// Start the transaction
-// 	tx, err := q.db.BeginTx(ctx, nil)
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	// Insert cart and get the inserted id
-// 	var cartID int64
-// 	err = tx.QueryRowContext(ctx, insertCart,
-// 		arg.TotalPrice,
-// 		arg.SenderName,
-// 		arg.SenderContactType,
-// 		arg.SenderContactDetail,
-// 	).Scan(&cartID)
-
-// 	if err != nil {
-// 		tx.Rollback()
-// 		return 0, err
-// 	}
-
-// 	// Insert cart items dynamically
-// 	stmt, err := tx.PrepareContext(ctx, insertCartItem)
-// 	if err != nil {
-// 		tx.Rollback()
-// 		return 0, err
-// 	}
-// 	defer stmt.Close()
-
-// 	for _, item := range items {
-// 		_, err := stmt.ExecContext(ctx, cartID, item.SellerID, item.ProductID, item.Qty, item.Price)
-// 		if err != nil {
-// 			tx.Rollback()
-// 			return 0, err
-// 		}
-// 	}
-
-// 	// Commit transaction
-// 	if err := tx.Commit(); err != nil {
-// 		return 0, err
-// 	}
-
-// 	return cartID, nil
-// }
 
 const selectProductsByCartId = `-- SelectProductsByCartId
 SELECT
@@ -263,13 +209,13 @@ type SelectProductsByCartIdRow struct {
 	ProductID        int64
 	Name             string
 	Category         *string
-	OriginalPrice    int64
+	OriginalPrice    float64
 	SKU              string
 	FileID           *string
 	FileURI          *string
 	FileThumbnailURI *string
 	CartQty          int
-	CartPrice        int64
+	CartPrice        float64
 	SellerID         int64
 	CreatedAt        time.Time
 	UpdatedAt        time.Time

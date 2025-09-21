@@ -109,7 +109,7 @@ type PurchasedItemResponse struct {
 	Name             string    `json:"name"`
 	Category         string    `json:"category"`
 	Qty              int       `json:"qty"`   // Quantity before bought
-	Price            int64     `json:"price"` // Price per item
+	Price            float64   `json:"price"` // Price per item
 	SKU              string    `json:"sku"`
 	FileID           string    `json:"fileId"`
 	FileURI          string    `json:"fileUri"`          // Related file URI
@@ -119,15 +119,15 @@ type PurchasedItemResponse struct {
 }
 
 type PaymentDetailResponse struct {
-	BankAccountName   string `json:"bankAccountName"`
-	BankAccountHolder string `json:"bankAccountHolder"`
-	BankAccountNumber string `json:"bankAccountNumber"`
-	TotalPrice        int64  `json:"totalPrice"` // Total for this seller
+	BankAccountName   string  `json:"bankAccountName"`
+	BankAccountHolder string  `json:"bankAccountHolder"`
+	BankAccountNumber string  `json:"bankAccountNumber"`
+	TotalPrice        float64 `json:"totalPrice"` // Total for this seller
 }
 
 type PurchaseResponse struct {
 	PurchaseID     string                  `json:"purchaseId"`     // Any ID
 	PurchasedItems []PurchasedItemResponse `json:"purchasedItems"` // Must be at least 1
-	TotalPrice     int64                   `json:"totalPrice"`     // Sum of all item prices
+	TotalPrice     float64                 `json:"totalPrice"`     // Sum of all item prices
 	PaymentDetails []PaymentDetailResponse `json:"paymentDetails"` // One per seller involved in transaction
 }
