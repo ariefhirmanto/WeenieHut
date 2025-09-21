@@ -22,8 +22,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("POST /v1/file", s.fileUploadHandler)
 	mux.HandleFunc("POST /v1/product", s.postProductHandler)
 	mux.HandleFunc("GET /v1/product", s.getProductsHandler)
-	mux.HandleFunc("PUT /v1/product/", s.updateProductHandler)
-	mux.HandleFunc("DELETE /v1/product/", s.deleteProductHandler)
+	mux.HandleFunc("PUT /v1/product/{productId}", s.updateProductHandler)
+	mux.HandleFunc("DELETE /v1/product/{productId}", s.deleteProductHandler)
 
 	mux.HandleFunc("POST /v1/purchase", s.purchaseCartHandler)
 	mux.HandleFunc("POST /v1/purchase/{purchaseId}", s.purchasePaymentHandler)

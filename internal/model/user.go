@@ -10,13 +10,13 @@ type User struct {
 	Email             sql.NullString
 	Phone             sql.NullString
 	PasswordHash      string
-	Name              string
-	FileID            int64
-	FileURI           string
-	FileThumbnailURI  string
-	BankAccountName   string
-	BankAccountHolder string
-	BankAccountNumber string
+	Name              sql.NullString
+	FileID            sql.NullInt64
+	FileURI           sql.NullString
+	FileThumbnailURI  sql.NullString
+	BankAccountName   sql.NullString
+	BankAccountHolder sql.NullString
+	BankAccountNumber sql.NullString
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }

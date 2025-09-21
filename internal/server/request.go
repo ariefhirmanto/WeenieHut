@@ -21,10 +21,15 @@ type PhoneRegisterRequest struct {
 }
 
 type UpdateUserProfileRequest struct {
+	Email             string `json:"email"`
+	Phone             string `json:"phone"`
+	Name              string `json:"name"`
 	FileID            string `json:"fileId"`
-	BankAccountName   string `json:"bankAccountName" validate:"omitempty,min=4,max=32"`
-	BankAccountHolder string `json:"bankAccountHolder" validate:"omitempty,min=4,max=32"`
-	BankAccountNumber string `json:"bankAccountNumber" validate:"omitempty,min=4,max=32"`
+	FileURI           string `json:"fileUri"`
+	FileThumbnailURI  string `json:"fileThumbnailUri"`
+	BankAccountName   string `json:"bankAccountName" validate:"required,min=4,max=32"`
+	BankAccountHolder string `json:"bankAccountHolder" validate:"required,min=4,max=32"`
+	BankAccountNumber string `json:"bankAccountNumber" validate:"required,min=4,max=32"`
 }
 
 type UpdateUserContactRequest struct {
@@ -34,6 +39,7 @@ type UpdateUserContactRequest struct {
 
 type PostProductRequest struct {
 	Name     string  `json:"name" validate:"required,min=4,max=32"`
+	UserID   int64   `json:"user_id"`
 	Category string  `json:"category" validate:"required,productType"`
 	Qty      int     `json:"qty" validate:"required,min=1"`
 	Price    float64 `json:"price" validate:"required,gte=100"`

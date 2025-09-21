@@ -4,6 +4,7 @@ import "time"
 
 type Product struct {
 	ID               int64     `db:"id"`
+	UserID           int64     `db:"user_id"`
 	Name             string    `db:"name"`
 	Category         *string   `db:"category"`
 	Qty              int       `db:"qty"`
@@ -27,6 +28,7 @@ type ProductFilter struct {
 
 type PostProductRequest struct {
 	Name     string  `json:"name" validate:"required,min=4,max=32"`
+	UserID   int64   `json:"user_id"`
 	Category string  `json:"category" validate:"required,productType"`
 	Qty      int     `json:"qty" validate:"required,min=1"`
 	Price    float64 `json:"price" validate:"required,gte=100"`
